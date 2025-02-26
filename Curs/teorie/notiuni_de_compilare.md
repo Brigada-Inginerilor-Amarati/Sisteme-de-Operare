@@ -41,6 +41,7 @@ Pentru a depista mai ușor sursa acestor erori se poate folosi un debugger din l
 
 Să considerăm următorul cod ce conține o problemă:
 
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,8 @@ strcpy(tab, "un text mai lung decat ar fi cazul...");
 printf("%s\n", tab);
 .....
 }
+```
+
 La compilare nu există warning-uri, dar la execuția programului se poate observa imediat mesajul specificat anterior. La compilare se recomandă includerea opțiunii -g pentru a include informații pentru debugging.
 
 gcc -Wall -g -o test ./test.c

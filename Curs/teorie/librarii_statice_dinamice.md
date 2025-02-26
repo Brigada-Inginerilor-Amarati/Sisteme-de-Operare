@@ -1,5 +1,5 @@
 Biblioteci statice și dinamice în Linux
-Cerințe pentru finalizare
+
 Biblioteci C
 O bibliotecă C, în general, se poate spune că reprezintă o colecție de funcții compilate. Poate fi văzută și ca un program executabil (compilat) fără existența funcției main(). Așadar, o bibliotecă reprezintă un cod deja compilat ce poate fi inclus în programe de către dezvoltatorul de aplicații. Pentru a putea apela funcțiile din interiorul unei biblioteci este absolut necesar ca aceasta să fie însoțită de un fișier header care să exporte elementele bibliotecii (fie ele funcții sau variabile globale). Indiferent de sistemul de operare, bibliotecile pot fi statice sau dinamice. Și în Linux putem identifica aceste două tipuri de biblioteci.
 
@@ -19,8 +19,11 @@ Fișierul test.h:
 void PrintTest(void);
 
 #endif
+```
+
 Fișierul test.c
 
+```c
 #include "test.h"
 #include <stdio.h>
 

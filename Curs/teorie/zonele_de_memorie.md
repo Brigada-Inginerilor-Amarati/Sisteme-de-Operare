@@ -4,7 +4,7 @@ zona de cod
 zona de stivă (stack)
 zona de heap
 zona statică (de variabile globale)
-Zona de cod  conține codul executabil al programului și bibliotecilor utilizate de către acesta. Această zonă este read-only (poate fi doar citită) la rulare (runtime).
+Zona de cod conține codul executabil al programului și bibliotecilor utilizate de către acesta. Această zonă este read-only (poate fi doar citită) la rulare (runtime).
 
 Zona de date statice (zona variabilelor globale)
 
@@ -20,6 +20,7 @@ Se observă că rezultatul apelului comenzii "ulimit -s " este o valoare (în kb
 
 În aceste condiții următorul program va compila, dar cu siguranță nu va rula și se va primi clasica eroare "Segmentation fault"
 
+```c
 #include <stdio.h>
 int main(void)
 {
@@ -27,10 +28,13 @@ int main(void)
    int tab[10000000];
    ......
 }
+```
+
 De asemenea, este important de remarcat și următoarea situație: se consideră 2 programe:
 
 Program 1:
 
+```c
 void function(void)
 {
    int tab[1000];
@@ -43,8 +47,11 @@ int main(void)
 {
    function();
 }
+```
+
 Program 2:
 
+```c
 int tab[1000];
 void function(void)
 {
@@ -58,6 +65,8 @@ int main(void)
 {
     function();
 }
+```
+
 Între cele 2 programe, aparent identice, există o mare diferență în termeni de performanță. În primul caz, apelul funcției "function()" durează mult mai mult decât apelul din al doilea program dat fiind faptul că în primul caz variabila "tab" (un tablou de 1000 de elemente) este stocat în zona de stivă. Astfel pentru apelul funcției "function()" sunt necesare mai multe operații de stocare în stivă decât în al doilea caz (dacă lipsesc optimizările de compilator, în cazul primului program se vor executa 1000 operații de tip PUSH și 1000 operații de tip POP în plus față de al doilea program).
 
 Este important de menționat că în cazul primului program se poate remedia situația prin adăugarea cuvântului cheie "static" în fața declarației variabilei din interiorul funcției. În acest caz, cuvântul "static" practic "mută" variabila "tab" din zona de stivă în zona statică păstrând restricțiile de vizibilitate (deși variabila "tab" ajunge în zona variabilelor globale, ea va fi în continuare vizibilă doar în corpul funcției în care a fost declarată).
@@ -68,9 +77,7 @@ Zona heap
 
 Această zonă de memorie este utilizată pentru a stoca blocuri de memorie în urma operațiunilor de alocare dinamică. În această zonă nu sunt stocate variabilele alocate dinamic, ci zonele de memorie alocate dinamic spre care referențiază variabilele respective. Această zonă de memorie este în principal limitată doar de capabilitățile hardware ale sistemului de calcul pe care rulează.
 
-
-
-/* De adaugat:
+/\* De adaugat:
 
 - despre variabile volatile
 
@@ -80,4 +87,4 @@ cum se pune pe stack un stack frame si cu pointerii
 
 - stack & heap avantaje si dezavantaje:
 
-viteza, cine face managementul, cum se face alocarea, etc.*/
+viteza, cine face managementul, cum se face alocarea, etc.\*/
