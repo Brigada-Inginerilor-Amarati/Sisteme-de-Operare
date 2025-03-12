@@ -1,0 +1,4 @@
+
+file1.txt:       84
+file2.txt:      101
+Total words: 185
