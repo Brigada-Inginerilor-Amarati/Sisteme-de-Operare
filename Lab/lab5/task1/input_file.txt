@@ -1,0 +1,2 @@
+someone@yahoo.com;192.168.0.2
+nobody@somedomain.ro;192.168.7.7
