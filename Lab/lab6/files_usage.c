@@ -1,5 +1,7 @@
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 int main() {
@@ -10,7 +12,18 @@ int main() {
     return 1;
   }
 
-  printf("FILE : %d\n", fd);
+  // create a directory
+  mkdir("new_directory", 0755);
+  struct stat st;
+  stat("new_directory", &st);
+
+  printf("STAT DIRECTORY : %x\n", st.st_mode);
+
+  lstat("new_directory", &st);
+  printf("LSTAT DIRECTORY : %x\n", st.st_mode);
+  fstat(fd, &st);
+
+  printf("FSTAT FILE : %x\n", st.st_mode);
 
   char buffer[1024];
   ssize_t bytes_read = read(fd, buffer, sizeof(buffer));
