@@ -8,10 +8,6 @@ build:
 	clang -Wall -o treasure_manager src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c
 	@echo "Project built successfully"
 
-clean:
-	@echo "Cleaning project"
-	rm -rf build/*
-
 usage:
 	@echo "Available commands:"
 	@echo "init: Initialize project"
@@ -30,14 +26,14 @@ add:
 	@echo "Adding new treasure hunt"
 	./treasure_manager --add hunt01
 
-list:
+ls:
 	@echo "Listing treasure hunts"
 	./treasure_manager --list hunt01
 
-remove_hunt:
+rm_h:
 	@echo "Removing treasure hunt"
 	./treasure_manager --remove hunt01
 
-remove_treasure:
+rm_t:
 	@echo "Removing treasure"
 	./treasure_manager --remove hunt01 treasure01

@@ -22,16 +22,19 @@ void print_help() {
 
 void print_parameters(char *hunt_id, char *treasure_id) {
   write(1, "Hunt ID: ", strlen("Hunt ID: "));
+
   if (hunt_id != NULL)
     write(1, hunt_id, strlen(hunt_id));
   else
     write(1, "NULL", 4);
-  write(1, "\n", 1);
-  write(1, "Treasure ID: ", strlen("Treasure ID: "));
+
+  write(1, "\nTreasure ID: ", strlen("\nTreasure ID: "));
+
   if (treasure_id != NULL)
     write(1, treasure_id, strlen(treasure_id));
   else
     write(1, "NULL", 4);
+
   write(1, "\n", 1);
 }
 
