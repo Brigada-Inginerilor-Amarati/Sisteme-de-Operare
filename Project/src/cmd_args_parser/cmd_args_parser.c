@@ -20,6 +20,43 @@ void print_help() {
   write(1, help_msg, strlen(help_msg));
 }
 
+void print_parameters(char *hunt_id, char *treasure_id) {
+  write(1, "Hunt ID: ", strlen("Hunt ID: "));
+  if (hunt_id != NULL)
+    write(1, hunt_id, strlen(hunt_id));
+  else
+    write(1, "NULL", 4);
+  write(1, "\n", 1);
+  write(1, "Treasure ID: ", strlen("Treasure ID: "));
+  if (treasure_id != NULL)
+    write(1, treasure_id, strlen(treasure_id));
+  else
+    write(1, "NULL", 4);
+  write(1, "\n", 1);
+}
+
+void print_operation(operation op) {
+  write(1, "Operation: ", 11);
+  switch (op) {
+  case HELP:
+    write(1, "DELETE", 6);
+    break;
+  case ADD:
+    write(1, "ADD", 3);
+    break;
+  case LIST:
+    write(1, "LIST", 4);
+    break;
+  case REMOVE:
+    write(1, "REMOVE", 6);
+    break;
+  default:
+    write(1, "INVALID", 7);
+    break;
+  }
+  write(1, "\n", 1);
+}
+
 char *get_hunt_id(int argc, char **argv) { return argc < 3 ? NULL : argv[2]; }
 
 char *get_treasure_id(int argc, char **argv) {
