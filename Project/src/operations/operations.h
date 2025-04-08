@@ -18,9 +18,15 @@ typedef enum {
 
 typedef enum {
   NO_ERROR = 1,
+  DIRECTORY_NOT_FOUND,
   DIRECTORY_ERROR,
-  DATA_FILE_ERROR,
+  FILE_NOT_FOUND,
+  FILE_ERROR,
+  SYMLINK_ERROR,
   OPERATION_FAILED,
 } operation_error;
+
+operation_error add_treasure(char *path);
+void print_operation_error(operation_error err);
 
 #endif

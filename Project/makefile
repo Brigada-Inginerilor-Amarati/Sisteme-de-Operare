@@ -8,7 +8,7 @@ init:
 
 build:
 	@echo "Building project"
-	clang -Wall -o ${EXE} src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c src/treasure/treasure.c
+	clang -Wall -o ${EXE} src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c src/treasure/treasure.c src/log/log.c
 	@echo "Project built successfully"
 
 usage:

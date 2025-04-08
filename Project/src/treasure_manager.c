@@ -25,13 +25,15 @@ int test_op(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-  treasure t = create_treasure();
+  operation_error error = NO_ERROR;
 
-  if (!is_void_treasure(&t))
-    print_treasure(&t);
-  else {
-    write(STDOUT_FILENO, "Void treasure.\n", strlen("Void treasure.\n"));
-  }
+  error = add_treasure("hunt01");
+
+  print_operation_error(error);
+
+  error = add_treasure("hunt02");
+
+  print_operation_error(error);
 
   return 0;
 }
