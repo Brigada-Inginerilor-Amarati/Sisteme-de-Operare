@@ -1,3 +1,6 @@
+
+EXE=./treasure_manager
+
 init:
 	@echo "Initializing project"
 	mkdir treasure_hunts
@@ -5,7 +8,7 @@ init:
 
 build:
 	@echo "Building project"
-	clang -Wall -o treasure_manager src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c
+	clang -Wall -o ${EXE} src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c src/treasure/treasure.c
 	@echo "Project built successfully"
 
 usage:
@@ -20,20 +23,20 @@ usage:
 	@echo "remove_treasure: Remove treasure"
 
 help:
-	./treasure_manager --help
+	${EXE} --help
 
 add:
 	@echo "Adding new treasure hunt"
-	./treasure_manager --add hunt01
+	${EXE} --add hunt01
 
 ls:
 	@echo "Listing treasure hunts"
-	./treasure_manager --list hunt01
+	${EXE} --list hunt01
 
 rm_h:
 	@echo "Removing treasure hunt"
-	./treasure_manager --remove hunt01
+	${EXE} --remove hunt01
 
 rm_t:
 	@echo "Removing treasure"
-	./treasure_manager --remove hunt01 treasure01
+	${EXE} --remove hunt01 treasure01

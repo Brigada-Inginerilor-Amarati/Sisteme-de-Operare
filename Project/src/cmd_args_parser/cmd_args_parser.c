@@ -1,4 +1,5 @@
 #include "cmd_args_parser.h"
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -16,7 +17,7 @@ void print_help() {
       "selected hunt.\n\t--list <hunt_id> <treasure_id> - to list a specific "
       "treasure within the selected hunt.\n\t--remove <hunt_id> <treasure_id> "
       "- to remove a specific treasure from the selected hunt.\n\t--remove "
-      "<hunt_id> - to remove all treasures from the selected hunt.";
+      "<hunt_id> - to remove all treasures from the selected hunt.\n";
   write(1, help_msg, strlen(help_msg));
 }
 

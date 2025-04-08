@@ -1,6 +1,6 @@
 #include "cmd_args_parser/cmd_args_parser.h"
 #include "operations/operations.h"
-#include "treasure.h"
+#include "treasure/treasure.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int main(int argc, char *argv[]) {
+int test_op(int argc, char *argv[]) {
   operation op = read_operation(argc, argv);
 
   if (op == OPERATION_INVALID)
@@ -19,6 +19,19 @@ int main(int argc, char *argv[]) {
 
   print_operation(op);
   print_parameters(hunt_id, treasure_id);
+
+  return 0;
+}
+
+int main(int argc, char *argv[]) {
+
+  treasure t = create_treasure();
+
+  if (!is_void_treasure(&t))
+    print_treasure(&t);
+  else {
+    write(STDOUT_FILENO, "Void treasure.\n", strlen("Void treasure.\n"));
+  }
 
   return 0;
 }
