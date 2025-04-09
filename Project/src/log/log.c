@@ -57,3 +57,20 @@ operation_error log_message(const char *path, const char *message) {
   close(fd);
   return NO_ERROR;
 }
+
+void get_invalid_input_log_message(char *msg, treasure *t) {
+  snprintf(msg, LOG_MESSAGE_MAX,
+           "ADD FAILED | INVALID INPUT | ID: %d | User: %s\n", t->id,
+           t->user_name);
+}
+
+void get_file_error_log_message(char *msg, treasure *t) {
+  snprintf(msg, LOG_MESSAGE_MAX,
+           "ADD FAILED | FILE ERROR | ID: %d | User: %s\n", t->id,
+           t->user_name);
+}
+
+void get_success_log_message(char *msg, treasure *t) {
+  snprintf(msg, LOG_MESSAGE_MAX, "ADD SUCCESS | ID: %d | User: %s\n", t->id,
+           t->user_name);
+}

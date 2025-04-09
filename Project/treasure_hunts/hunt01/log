@@ -1,9 +1,16 @@
-Wed Apr  9 22:12:13 2025
-ADD SUCCESS | User: paul1
 
-Wed Apr  9 22:13:20 2025
-ADD SUCCESS | User: dan
+Wed Apr  9 22:45:03 2025
+ADD SUCCESS | ID: 1 | User: paul1
 
-Wed Apr  9 22:13:33 2025
-ADD SUCCESS | User: daria
+Wed Apr  9 22:45:17 2025
+ADD SUCCESS | ID: 2 | User: paul2
+
+Wed Apr  9 22:45:33 2025
+ADD SUCCESS | ID: 25 | User: paul3
+
+Wed Apr  9 22:47:21 2025
+ADD SUCCESS | ID: 2 | User: daria
+
+Wed Apr  9 22:47:37 2025
+ADD FAILED | INVALID INPUT | ID: 525 | User: ada
 

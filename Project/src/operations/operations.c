@@ -12,11 +12,8 @@
 #include <unistd.h>
 
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
-#define NEW_DIR_MESSAGE "New hunt directory created: "
-#define NEW_TREASURE_MESSAGE "New treasure added: "
-/*
-TODO: Implement the ADD operation.
 
+/*
 Parameters: <hunt_id> -> char *
 Task: Add a new treasure to the specified hunt in the treasures.dat file.
 Exception: Creates a new hunt directory if it does not exist.
@@ -88,22 +85,18 @@ operation_error add_treasure(char *path) {
   treasure t = create_treasure();
   char log_msg[LOG_MESSAGE_MAX] = "";
   if (is_void_treasure(&t)) {
-    snprintf(log_msg, LOG_MESSAGE_MAX,
-             "ADD FAILED | INVALID INPUT | User: %s\n", t.user_name);
-
+    get_invalid_input_log_message(log_msg, &t);
     log_message(full_path, log_msg);
     return INVALID_INPUT;
   }
 
   if (write_treasure_to_file(&t, full_path) != NO_ERROR) {
-    snprintf(log_msg, LOG_MESSAGE_MAX, "ADD FAILED | FILE ERROR | User: %s\n",
-             t.user_name);
+    get_file_error_log_message(log_msg, &t);
     log_message(full_path, log_msg);
     return FILE_ERROR;
   }
 
-  snprintf(log_msg, LOG_MESSAGE_MAX, "ADD SUCCESS | User: %s\n", t.user_name);
-
+  get_success_log_message(log_msg, &t);
   log_message(full_path, log_msg);
 
   return NO_ERROR;
@@ -111,6 +104,10 @@ operation_error add_treasure(char *path) {
 
 /*
 TODO: Implement the LIST operation.
+
+Parameters: <hunt_id> -> char *
+or
+<hunt_id>,
 */
 
 /*

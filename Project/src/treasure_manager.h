@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 typedef struct {
+  int id;
   char user_name[USER_NAME_MAX_LENGTH];
   int value;
   double latitude;

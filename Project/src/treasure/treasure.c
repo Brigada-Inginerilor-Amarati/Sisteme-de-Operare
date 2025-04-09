@@ -1,5 +1,6 @@
 #include "treasure.h"
 #include "../log/log.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,63 +35,96 @@ int read_line(char *buf, size_t size) {
 }
 
 treasure create_treasure() {
-  treasure void_t = {"\0", 0, 0.0, 0.0, "\0"};
+  treasure void_t = {0, "\0", 0, 0.0, 0.0, "\0"};
   treasure t = void_t;
 
   char buffer[BUFFER_SIZE];
 
+  // id
+  write(STDOUT_FILENO, "Enter id: ", 10);
+  if (!read_line(buffer, sizeof(buffer))) {
+    perror("INVALID ID FORMAT");
+    return t;
+  }
+  t.id = atoi(buffer);
+
+  // check atoi error
+  if (t.id == 0 && errno == EINVAL) {
+    perror("INVALID ID FORMAT");
+    return t;
+  }
+
   // user_name
   write(STDOUT_FILENO, "Enter user name: ", 17);
   if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid user name.\n", 20);
-    return void_t;
+    perror("INVALID USER NAME FORMAT");
+    return t;
   }
 
   strncpy(t.user_name, buffer, sizeof(t.user_name) - 1);
 
   char *endptr;
+
   // value
   write(STDOUT_FILENO, "Enter value: ", 13);
   if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid value.\n", 16);
-    return void_t;
+    perror("INVALID VALUE FORMAT");
+    return t;
   }
   t.value = (int)strtol(buffer, &endptr, 10);
   if (endptr == buffer) {
-    write(STDERR_FILENO, "Invalid value.\n", 16);
-    return void_t;
+    perror("INVALID ID FORMAT");
+    return t;
+  }
+
+  // check value error
+  if (t.value == 0 && errno == EINVAL) {
+    perror("INVALID VALUE FORMAT");
+    return t;
   }
 
   // latitude
   write(STDOUT_FILENO, "Enter latitude: ", 16);
   if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid latitude.\n", 19);
-    return void_t;
+    perror("INVALID LATITUDE FORMAT");
+    return t;
   }
 
   t.latitude = strtod(buffer, &endptr);
   if (endptr == buffer || !is_valid_latitude(t.latitude)) {
-    write(STDERR_FILENO, "Invalid latitude.\n", 19);
-    return void_t;
+    perror("INVALID LATITUDE FORMAT");
+    return t;
+  }
+
+  // check latitude error
+  if (t.latitude == 0 && errno == EINVAL) {
+    perror("INVALID LATITUDE FORMAT");
+    return t;
   }
 
   // longitude
   write(STDOUT_FILENO, "Enter longitude: ", 17);
   if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid longitude.\n", 20);
-    return void_t;
+    perror("INVALID LONGITUDE FORMAT");
+    return t;
   }
   t.longitude = strtod(buffer, &endptr);
   if (endptr == buffer || !is_valid_longitude(t.longitude)) {
-    write(STDERR_FILENO, "Invalid longitude.\n", 20);
-    return void_t;
+    perror("INVALID LONGITUDE FORMAT");
+    return t;
+  }
+
+  // check longitude error
+  if (t.longitude == 0 && errno == EINVAL) {
+    perror("INVALID LONGITUDE FORMAT");
+    return t;
   }
 
   // clue_text
   write(STDOUT_FILENO, "Enter clue text: ", 17);
   if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid clue text.\n", 20);
-    return void_t;
+    perror("INVALID CLUE TEXT FORMAT");
+    return t;
   }
   strncpy(t.clue_text, buffer, sizeof(t.clue_text) - 1);
 
@@ -98,8 +132,8 @@ treasure create_treasure() {
 }
 
 int is_void_treasure(const treasure *t) {
-  return t->user_name[0] == '\0' && t->latitude == 0.0 && t->longitude == 0.0 &&
-         t->clue_text[0] == '\0' && t->value == 0;
+  return t->id == 0 || t->user_name[0] == '\0' || t->latitude == 0.0 ||
+         t->longitude == 0.0 || t->clue_text[0] == '\0' || t->value == 0;
 }
 
 void print_treasure(const treasure *t) {
@@ -110,6 +144,10 @@ void print_treasure(const treasure *t) {
   char buffer[MAX_BUFFER] = "";
 
   sprintf(buffer, "Treasure Info:\n");
+
+  strcat(buffer, "ID: ");
+  sprintf(double_nr_buffer, "%d", t->id);
+  strcat(buffer, double_nr_buffer);
 
   strcat(buffer, "User Name: ");
   strcat(buffer, t->user_name);
@@ -132,7 +170,7 @@ void print_treasure(const treasure *t) {
 }
 
 void get_treasure_string(char *buffer, const treasure *t) {
-  snprintf(buffer, MAX_TREASURE_STRING_LENGTH, "%s,%d,%lf,%lf,%s\n",
+  snprintf(buffer, MAX_TREASURE_STRING_LENGTH, "%d,%s,%d,%lf,%lf,%s\n", t->id,
            t->user_name, t->value, t->latitude, t->longitude, t->clue_text);
 }
 

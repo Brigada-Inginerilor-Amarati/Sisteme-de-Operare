@@ -28,7 +28,6 @@ help:
 add:
 	@echo "Adding new treasure hunt"
 	${EXE} --add hunt01
-	${EXE} --add hunt01
 
 ls:
 	@echo "Listing treasure hunts"
