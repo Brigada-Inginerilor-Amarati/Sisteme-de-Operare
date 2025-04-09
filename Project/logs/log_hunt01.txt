@@ -1,0 +1,1 @@
+../treasure_hunts/hunt01/treasures.dat

@@ -83,8 +83,8 @@ operation_error add_treasure(char *path) {
       add_file(full_path, log_path) != NO_ERROR)
     return FILE_ERROR;
 
-  // if (symlink_file(path) != NO_ERROR)
-  // return SYMLINK_ERROR;
+  if (symlink_file(path) != NO_ERROR)
+    return SYMLINK_ERROR;
 
   return NO_ERROR;
 }

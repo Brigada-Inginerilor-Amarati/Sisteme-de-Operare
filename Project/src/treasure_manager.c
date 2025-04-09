@@ -1,3 +1,4 @@
+#include "treasure_manager.h"
 #include "cmd_args_parser/cmd_args_parser.h"
 #include "operations/operations.h"
 #include "treasure/treasure.h"
@@ -29,11 +30,11 @@ int main(int argc, char *argv[]) {
 
   error = add_treasure("hunt01");
 
-  print_operation_error(error);
+  // print_operation_error(error);
 
   error = add_treasure("hunt02");
 
-  print_operation_error(error);
+  // print_operation_error(error);
 
   return 0;
 }
