@@ -2,7 +2,6 @@
 #include "cmd_args_parser/cmd_args_parser.h"
 #include "log/log.h"
 #include "operations/operations.h"
-#include "treasure/treasure.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -17,7 +16,7 @@ int test_op(int argc, char *argv[]) {
     return -1;
 
   char *hunt_id = get_hunt_id(argc, argv);
-  char *treasure_id = get_treasure_id(argc, argv);
+  int treasure_id = get_treasure_id(argc, argv);
 
   print_operation(op);
   print_parameters(hunt_id, treasure_id);
@@ -32,7 +31,7 @@ void test_add(int argc, char *argv[]) {
     return;
 
   char *hunt_id = get_hunt_id(argc, argv);
-  char *treasure_id = get_treasure_id(argc, argv);
+  int treasure_id = get_treasure_id(argc, argv);
 
   print_operation(op);
   print_parameters(hunt_id, treasure_id);
@@ -51,12 +50,19 @@ operation_error execute_operation(int argc, char *argv[]) {
     return OPERATION_FAILED;
 
   char *hunt_id = get_hunt_id(argc, argv);
-  char *treasure_id = get_treasure_id(argc, argv);
+  int treasure_id = get_treasure_id(argc, argv);
 
-  if (op == ADD)
+  switch (op) {
+  case ADD:
     return add_treasure(hunt_id);
-
-  return NO_ERROR;
+  case LIST:
+    if (treasure_id == -1)
+      return list_hunt(hunt_id);
+    else
+      return list_treasure(hunt_id, treasure_id);
+  default:
+    return NO_ERROR;
+  }
 }
 
 int main(int argc, char *argv[]) {

@@ -32,11 +32,13 @@ int symlink_file(const char *path) {
 operation_error log_message(const char *path, const char *message) {
 
   char log_path[PATH_MAX] = "";
-  snprintf(log_path, sizeof(log_path), "%s/%s", path, LOG_FILE_NAME);
+  snprintf(log_path, sizeof(log_path), "%s/%s/%s", TREASURE_DIRECTORY, path,
+           LOG_FILE_NAME);
 
   int fd = open(log_path, O_WRONLY | O_APPEND | O_CREAT, 0644);
   if (fd == -1) {
     perror("LOG OPEN FAILED");
+    perror(log_path);
     return FILE_ERROR;
   }
 
@@ -58,19 +60,42 @@ operation_error log_message(const char *path, const char *message) {
   return NO_ERROR;
 }
 
-void get_invalid_input_log_message(char *msg, treasure *t) {
+void get_add_failure_log_message(char *msg, treasure *t) {
   snprintf(msg, LOG_MESSAGE_MAX,
-           "ADD FAILED | INVALID INPUT | ID: %d | User: %s\n", t->id,
+           "ADD FAILURE | INVALID INPUT | ID: %d | User: %s\n", t->id,
            t->user_name);
 }
 
-void get_file_error_log_message(char *msg, treasure *t) {
+void get_add_killed_log_message(char *msg, treasure *t) {
   snprintf(msg, LOG_MESSAGE_MAX,
-           "ADD FAILED | FILE ERROR | ID: %d | User: %s\n", t->id,
+           "ADD FAILURE | FILE ERROR | ID: %d | User: %s\n", t->id,
            t->user_name);
 }
 
-void get_success_log_message(char *msg, treasure *t) {
+void get_add_success_log_message(char *msg, treasure *t) {
   snprintf(msg, LOG_MESSAGE_MAX, "ADD SUCCESS | ID: %d | User: %s\n", t->id,
            t->user_name);
+}
+
+void get_search_killed_log_message(char *msg, int id) {
+  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH FAILURE | FILE NOT FOUND | ID: %d\n",
+           id);
+}
+
+void get_search_failure_log_message(char *msg, int id) {
+  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH FAILURE | ITEM NOT FOUND | ID: %d\n",
+           id);
+}
+
+void get_search_success_log_message(char *msg, int id) {
+  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH SUCCESS | ID: %d\n", id);
+}
+
+void get_list_failure_log_message(char *msg, char *path) {
+  snprintf(msg, LOG_MESSAGE_MAX, "LIST FAILURE | ITEM NOT FOUND | Path: %s\n",
+           path);
+}
+
+void get_list_success_log_message(char *msg, char *path) {
+  snprintf(msg, LOG_MESSAGE_MAX, "LIST SUCCESS | Path: %s\n", path);
 }

@@ -9,6 +9,13 @@
 // the number of operations.
 
 operation_error add_treasure(char *path);
+
+operation_error list_hunt(char *path);
+operation_error list_treasure(char *path, int id);
+
+operation_error remove_hunt(char *path);
+operation_error remove_treasure(char *path, int id);
+
 void print_operation_error(operation_error err);
 
 #endif

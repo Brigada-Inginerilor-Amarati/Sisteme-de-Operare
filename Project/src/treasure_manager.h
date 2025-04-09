@@ -18,27 +18,21 @@ typedef struct {
   char clue_text[CLUE_TEXT_MAX_LENGTH];
 } treasure;
 
-typedef enum {
-  OPERATION_INVALID = -1,
-  HELP,
-  ADD,
-  LIST,
-  REMOVE,
-  OP_COUNT
-} operation;
+typedef enum { OPERATION_INVALID, HELP, ADD, LIST, REMOVE, OP_COUNT } operation;
 
 typedef enum {
-  NO_ERROR = 1,
+  NO_ERROR,
   DIRECTORY_NOT_FOUND,
   DIRECTORY_ERROR,
   FILE_NOT_FOUND,
   FILE_ERROR,
   SYMLINK_ERROR,
   OPERATION_FAILED,
-  INVALID_INPUT
+  INVALID_INPUT,
+  TREASURE_NOT_FOUND
 } operation_error;
 
-#define TREASURE_FILE_NAME "treasures.dat"
+#define TREASURE_FILE_NAME "treasures.csv"
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define LOG_DIRECTORY "logs"
 #define LOG_FILE_NAME "log"

@@ -21,7 +21,7 @@ void print_help() {
   write(1, help_msg, strlen(help_msg));
 }
 
-void print_parameters(char *hunt_id, char *treasure_id) {
+void print_parameters(char *hunt_id, int treasure_id) {
   write(1, "Hunt ID: ", strlen("Hunt ID: "));
 
   if (hunt_id != NULL)
@@ -31,9 +31,11 @@ void print_parameters(char *hunt_id, char *treasure_id) {
 
   write(1, "\nTreasure ID: ", strlen("\nTreasure ID: "));
 
-  if (treasure_id != NULL)
-    write(1, treasure_id, strlen(treasure_id));
-  else
+  if (treasure_id != -1) {
+    char treasure_id_str[10];
+    sprintf(treasure_id_str, "%d", treasure_id);
+    write(1, treasure_id_str, strlen(treasure_id_str));
+  } else
     write(1, "NULL", 4);
 
   write(1, "\n", 1);
@@ -63,8 +65,10 @@ void print_operation(operation op) {
 
 char *get_hunt_id(int argc, char **argv) { return argc < 3 ? NULL : argv[2]; }
 
-char *get_treasure_id(int argc, char **argv) {
-  return argc < 4 ? NULL : argv[3];
+int get_treasure_id(int argc, char **argv) {
+  if (argc < 4)
+    return -1;
+  return atoi(argv[3]);
 }
 
 operation read_operation(int argc, char **argv) {

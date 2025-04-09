@@ -9,13 +9,13 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/syslimits.h>
+#include <time.h>
 #include <unistd.h>
-
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
 
 /*
 Parameters: <hunt_id> -> char *
-Task: Add a new treasure to the specified hunt in the treasures.dat file.
+Task: Add a new treasure to the specified hunt in the treasures.csv file.
 Exception: Creates a new hunt directory if it does not exist.
 */
 
@@ -85,19 +85,19 @@ operation_error add_treasure(char *path) {
   treasure t = create_treasure();
   char log_msg[LOG_MESSAGE_MAX] = "";
   if (is_void_treasure(&t)) {
-    get_invalid_input_log_message(log_msg, &t);
-    log_message(full_path, log_msg);
+    get_add_failure_log_message(log_msg, &t);
+    log_message(path, log_msg);
     return INVALID_INPUT;
   }
 
   if (write_treasure_to_file(&t, full_path) != NO_ERROR) {
-    get_file_error_log_message(log_msg, &t);
-    log_message(full_path, log_msg);
+    get_add_killed_log_message(log_msg, &t);
+    log_message(path, log_msg);
     return FILE_ERROR;
   }
 
-  get_success_log_message(log_msg, &t);
-  log_message(full_path, log_msg);
+  get_add_success_log_message(log_msg, &t);
+  log_message(path, log_msg);
 
   return NO_ERROR;
 }
@@ -107,8 +107,163 @@ TODO: Implement the LIST operation.
 
 Parameters: <hunt_id> -> char *
 or
-<hunt_id>,
+<hunt_id>, <treasure_id> -> char * and int
+Task: List all treasures in the hunt directory.
+Task2: List the specific treasure.
 */
+
+off_t get_directory_total_size(const char *dir_path) {
+  DIR *dir = opendir(dir_path);
+  if (!dir)
+    return 0;
+
+  struct dirent *entry;
+  struct stat st;
+  char file_path[PATH_MAX];
+  off_t total_size = 0;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+
+    snprintf(file_path, PATH_MAX, "%s/%s", dir_path, entry->d_name);
+    if (stat(file_path, &st) == 0)
+      total_size += st.st_size;
+  }
+
+  closedir(dir);
+  return total_size;
+}
+
+time_t get_directory_last_modified_time(const char *dir_path) {
+  DIR *dir = opendir(dir_path);
+  if (!dir)
+    return 0;
+
+  struct dirent *entry;
+  struct stat st;
+  char file_path[PATH_MAX];
+  time_t latest_mtime = 0;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+
+    snprintf(file_path, PATH_MAX, "%s/%s", dir_path, entry->d_name);
+    if (stat(file_path, &st) == 0 && st.st_mtime > latest_mtime)
+      latest_mtime = st.st_mtime;
+  }
+
+  closedir(dir);
+  return latest_mtime;
+}
+
+operation_error list_hunt(char *path) {
+
+  char log_msg[LOG_MESSAGE_MAX];
+  char full_path[PATH_MAX] = "";
+  char dir_path[PATH_MAX] = "";
+  snprintf(dir_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
+  snprintf(full_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
+
+  // print all the contents of the file
+  int fd = open(full_path, O_RDONLY);
+  if (fd == -1) {
+    perror("LIST ERROR, FILE NOT FOUND");
+    get_list_failure_log_message(log_msg, path);
+    log_message(path, log_msg);
+    return FILE_NOT_FOUND;
+  }
+
+  // print the hunt name
+  write(STDOUT_FILENO, "Hunt: ", strlen("Hunt: "));
+  write(STDOUT_FILENO, path, strlen(path));
+  write(STDOUT_FILENO, "\n", strlen("\n"));
+
+  // print the total size of the directory
+  off_t total_size = get_directory_total_size(dir_path);
+  char total_size_str[BUFSIZ];
+  snprintf(total_size_str, BUFSIZ, "Total size: %llu bytes\n", total_size);
+  write(STDOUT_FILENO, total_size_str, strlen(total_size_str));
+
+  // print the last modification time
+  time_t latest_mtime = get_directory_last_modified_time(dir_path);
+  char *time_str = ctime(&latest_mtime);
+  if (time_str != NULL) {
+    write(STDOUT_FILENO, "Last modified: ", strlen("Last modified: "));
+    write(STDOUT_FILENO, time_str, strlen(time_str));
+  }
+
+  char buffer[BUFSIZ];
+  ssize_t bytes_read;
+  while ((bytes_read = read(fd, buffer, BUFSIZ)) > 0) {
+    write(STDOUT_FILENO, buffer, bytes_read);
+  }
+
+  close(fd);
+  get_list_success_log_message(log_msg, path);
+  log_message(path, log_msg);
+
+  return NO_ERROR;
+}
+
+int extract_id(char *string) {
+  int id = 0;
+  // the id is the first number in the string
+  sscanf(string, "%d", &id);
+  return id;
+}
+
+operation_error list_treasure(char *path, int id) {
+  if (id == 0)
+    return TREASURE_NOT_FOUND;
+
+  char log_msg[LOG_MESSAGE_MAX];
+  char full_path[PATH_MAX] = "";
+  snprintf(full_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
+           TREASURE_FILE_NAME);
+
+  int fd = open(full_path, O_RDONLY);
+  if (fd == -1) {
+    get_search_killed_log_message(log_msg, id);
+    log_message(path, log_msg);
+    perror("LIST ERROR, FILE NOT FOUND");
+    return FILE_NOT_FOUND;
+  }
+
+  char ch;
+  char line[BUFSIZ];
+  int line_idx = 0;
+  ssize_t bytes_read;
+
+  // Citește caracter cu caracter
+  while ((bytes_read = read(fd, &ch, 1)) == 1) {
+    if (ch == '\n' || line_idx >= BUFSIZ - 1) {
+      // Final de linie -> termină stringul
+      line[line_idx] = '\0';
+
+      // Extrage și compară id
+      if (extract_id(line) == id) {
+        write(STDOUT_FILENO, line, strlen(line));
+        write(STDOUT_FILENO, "\n", 1);
+        get_search_success_log_message(log_msg, id);
+        log_message(path, log_msg);
+        close(fd);
+        return NO_ERROR;
+      }
+
+      line_idx = 0;
+    } else {
+      line[line_idx++] = ch;
+    }
+  }
+
+  close(fd);
+
+  get_search_failure_log_message(log_msg, id);
+  log_message(path, log_msg);
+  return TREASURE_NOT_FOUND;
+}
 
 /*
 TODO: Implement the REMOVE operation.

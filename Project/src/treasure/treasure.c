@@ -61,6 +61,11 @@ treasure create_treasure() {
     return t;
   }
 
+  // remove newline if present
+  char *newline = strchr(buffer, '\n');
+  if (newline)
+    *newline = '\0';
+
   strncpy(t.user_name, buffer, sizeof(t.user_name) - 1);
 
   char *endptr;
@@ -108,6 +113,7 @@ treasure create_treasure() {
     perror("INVALID LONGITUDE FORMAT");
     return t;
   }
+
   t.longitude = strtod(buffer, &endptr);
   if (endptr == buffer || !is_valid_longitude(t.longitude)) {
     perror("INVALID LONGITUDE FORMAT");
@@ -126,6 +132,12 @@ treasure create_treasure() {
     perror("INVALID CLUE TEXT FORMAT");
     return t;
   }
+
+  // remove newline if present
+  newline = strchr(buffer, '\n');
+  if (newline)
+    *newline = '\0';
+
   strncpy(t.clue_text, buffer, sizeof(t.clue_text) - 1);
 
   return t;

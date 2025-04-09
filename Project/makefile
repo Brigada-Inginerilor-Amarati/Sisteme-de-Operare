@@ -29,9 +29,13 @@ add:
 	@echo "Adding new treasure hunt"
 	${EXE} --add hunt01
 
-ls:
+ls_h:
 	@echo "Listing treasure hunts"
 	${EXE} --list hunt01
+
+ls_t:
+	@echo "Listing treasures"
+	${EXE} --list hunt01 69
 
 rm_h:
 	@echo "Removing treasure hunt"

@@ -5,8 +5,15 @@
 
 int symlink_file(const char *path);
 operation_error log_message(const char *dir_name, const char *message);
-void get_invalid_input_log_message(char *msg, treasure *t);
-void get_success_log_message(char *msg, treasure *t);
-void get_file_error_log_message(char *msg, treasure *t);
 
+void get_add_success_log_message(char *msg, treasure *t);
+void get_add_failure_log_message(char *msg, treasure *t);
+void get_add_killed_log_message(char *msg, treasure *t);
+
+void get_search_success_log_message(char *msg, int id);
+void get_search_failure_log_message(char *msg, int id);
+void get_search_killed_log_message(char *msg, int id);
+
+void get_list_failure_log_message(char *msg, char *path);
+void get_list_success_log_message(char *msg, char *path);
 #endif
