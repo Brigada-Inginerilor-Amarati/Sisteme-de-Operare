@@ -34,6 +34,6 @@ typedef enum {
 #define TREASURE_FILE_NAME "treasures.dat"
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define LOG_DIRECTORY "logs"
-#define LOG_FILE_SUFFIX ".log"
+#define LOG_FILE_NAME "log"
 
 #endif

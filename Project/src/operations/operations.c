@@ -77,13 +77,13 @@ operation_error add_directory(char *path) {
 operation_error add_treasure(char *path) {
 
   char full_path[PATH_MAX] = "";
-  snprintf(full_path, PATH_MAX, "%s/%s", base_path, path);
+  snprintf(full_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
 
   if (!directory_exists(full_path) && add_directory(full_path) != NO_ERROR)
     return DIRECTORY_ERROR;
 
-  if (add_file(full_path, treasures_path) != NO_ERROR ||
-      add_file(full_path, log_path) != NO_ERROR)
+  if (add_file(full_path, TREASURE_FILE_NAME) != NO_ERROR ||
+      add_file(full_path, LOG_FILE_NAME) != NO_ERROR)
     return FILE_ERROR;
 
   if (symlink_file(path) != NO_ERROR)
