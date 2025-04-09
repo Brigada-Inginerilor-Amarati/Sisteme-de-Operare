@@ -85,6 +85,27 @@ operation_error add_treasure(char *path) {
   if (symlink_file(path) != NO_ERROR)
     return SYMLINK_ERROR;
 
+  treasure t = create_treasure();
+  char log_msg[LOG_MESSAGE_MAX] = "";
+  if (is_void_treasure(&t)) {
+    snprintf(log_msg, LOG_MESSAGE_MAX,
+             "ADD FAILED | INVALID INPUT | User: %s\n", t.user_name);
+
+    log_message(full_path, log_msg);
+    return INVALID_INPUT;
+  }
+
+  if (write_treasure_to_file(&t, full_path) != NO_ERROR) {
+    snprintf(log_msg, LOG_MESSAGE_MAX, "ADD FAILED | FILE ERROR | User: %s\n",
+             t.user_name);
+    log_message(full_path, log_msg);
+    return FILE_ERROR;
+  }
+
+  snprintf(log_msg, LOG_MESSAGE_MAX, "ADD SUCCESS | User: %s\n", t.user_name);
+
+  log_message(full_path, log_msg);
+
   return NO_ERROR;
 }
 

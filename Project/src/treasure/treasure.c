@@ -1,7 +1,9 @@
 #include "treasure.h"
+#include "../log/log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syslimits.h>
 #include <unistd.h>
 
 // max length of clue + 1 for newline
@@ -32,7 +34,7 @@ int read_line(char *buf, size_t size) {
 }
 
 treasure create_treasure() {
-  treasure void_t = {"\0", 0.0, 0.0, "\0", 0};
+  treasure void_t = {"\0", 0, 0.0, 0.0, "\0"};
   treasure t = void_t;
 
   char buffer[BUFFER_SIZE];
@@ -43,7 +45,21 @@ treasure create_treasure() {
     write(STDERR_FILENO, "Invalid user name.\n", 20);
     return void_t;
   }
+
   strncpy(t.user_name, buffer, sizeof(t.user_name) - 1);
+
+  char *endptr;
+  // value
+  write(STDOUT_FILENO, "Enter value: ", 13);
+  if (!read_line(buffer, sizeof(buffer))) {
+    write(STDERR_FILENO, "Invalid value.\n", 16);
+    return void_t;
+  }
+  t.value = (int)strtol(buffer, &endptr, 10);
+  if (endptr == buffer) {
+    write(STDERR_FILENO, "Invalid value.\n", 16);
+    return void_t;
+  }
 
   // latitude
   write(STDOUT_FILENO, "Enter latitude: ", 16);
@@ -51,7 +67,7 @@ treasure create_treasure() {
     write(STDERR_FILENO, "Invalid latitude.\n", 19);
     return void_t;
   }
-  char *endptr;
+
   t.latitude = strtod(buffer, &endptr);
   if (endptr == buffer || !is_valid_latitude(t.latitude)) {
     write(STDERR_FILENO, "Invalid latitude.\n", 19);
@@ -78,18 +94,6 @@ treasure create_treasure() {
   }
   strncpy(t.clue_text, buffer, sizeof(t.clue_text) - 1);
 
-  // value
-  write(STDOUT_FILENO, "Enter value: ", 13);
-  if (!read_line(buffer, sizeof(buffer))) {
-    write(STDERR_FILENO, "Invalid value.\n", 16);
-    return void_t;
-  }
-  t.value = (int)strtol(buffer, &endptr, 10);
-  if (endptr == buffer) {
-    write(STDERR_FILENO, "Invalid value.\n", 16);
-    return void_t;
-  }
-
   return t;
 }
 
@@ -110,6 +114,10 @@ void print_treasure(const treasure *t) {
   strcat(buffer, "User Name: ");
   strcat(buffer, t->user_name);
 
+  strcat(buffer, "\nValue: ");
+  sprintf(double_nr_buffer, "%d", t->value);
+  strcat(buffer, double_nr_buffer);
+
   strcat(buffer, "\nLatitude: ");
   sprintf(double_nr_buffer, "%lf", t->latitude);
   strcat(buffer, double_nr_buffer);
@@ -120,10 +128,30 @@ void print_treasure(const treasure *t) {
 
   strcat(buffer, "\nClue Text: ");
   strcat(buffer, t->clue_text);
-
-  strcat(buffer, "\nValue: ");
-  sprintf(double_nr_buffer, "%d", t->value);
-  strcat(buffer, double_nr_buffer);
-
   write(STDOUT_FILENO, buffer, strlen(buffer));
+}
+
+void get_treasure_string(char *buffer, const treasure *t) {
+  snprintf(buffer, MAX_TREASURE_STRING_LENGTH, "%s,%d,%lf,%lf,%s\n",
+           t->user_name, t->value, t->latitude, t->longitude, t->clue_text);
+}
+
+operation_error write_treasure_to_file(const treasure *t,
+                                       const char *dir_path) {
+
+  char full_path[PATH_MAX];
+  snprintf(full_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
+
+  int fd = open(full_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+  if (fd == -1) {
+    perror("WRITE TREASURE TO FILE ERROR");
+    return FILE_ERROR;
+  }
+
+  char buffer[MAX_TREASURE_STRING_LENGTH];
+  get_treasure_string(buffer, t);
+  write(fd, buffer, strlen(buffer));
+
+  close(fd);
+  return NO_ERROR;
 }

@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/fcntl.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -28,11 +29,10 @@ int symlink_file(const char *path) {
   return NO_ERROR;
 }
 
-operation_error log_message(const char *dir_name, const char *message) {
+operation_error log_message(const char *path, const char *message) {
 
   char log_path[PATH_MAX] = "";
-  snprintf(log_path, sizeof(log_path), "%s/%s.%s", LOG_DIRECTORY, dir_name,
-           LOG_FILE_NAME);
+  snprintf(log_path, sizeof(log_path), "%s/%s", path, LOG_FILE_NAME);
 
   int fd = open(log_path, O_WRONLY | O_APPEND | O_CREAT, 0644);
   if (fd == -1) {

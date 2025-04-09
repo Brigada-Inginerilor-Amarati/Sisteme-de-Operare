@@ -4,12 +4,17 @@
 #define USER_NAME_MAX_LENGTH 16
 #define CLUE_TEXT_MAX_LENGTH 64
 
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 typedef struct {
   char user_name[USER_NAME_MAX_LENGTH];
+  int value;
   double latitude;
   double longitude;
   char clue_text[CLUE_TEXT_MAX_LENGTH];
-  int value;
 } treasure;
 
 typedef enum {
@@ -29,11 +34,13 @@ typedef enum {
   FILE_ERROR,
   SYMLINK_ERROR,
   OPERATION_FAILED,
+  INVALID_INPUT
 } operation_error;
 
 #define TREASURE_FILE_NAME "treasures.dat"
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define LOG_DIRECTORY "logs"
 #define LOG_FILE_NAME "log"
+#define LOG_MESSAGE_MAX 256
 
 #endif

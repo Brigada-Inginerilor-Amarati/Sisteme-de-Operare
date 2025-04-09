@@ -28,6 +28,7 @@ help:
 add:
 	@echo "Adding new treasure hunt"
 	${EXE} --add hunt01
+	${EXE} --add hunt01
 
 ls:
 	@echo "Listing treasure hunts"
@@ -40,3 +41,10 @@ rm_h:
 rm_t:
 	@echo "Removing treasure"
 	${EXE} --remove hunt01 treasure01
+
+clean:
+	@echo "Cleaning project"
+	rm -rf treasure_hunts
+	rm -rf logs
+	mkdir treasure_hunts
+	mkdir logs
