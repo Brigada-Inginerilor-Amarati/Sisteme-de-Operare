@@ -11,11 +11,9 @@
 #include <sys/syslimits.h>
 #include <unistd.h>
 
-const char *base_path = "treasure_hunts";
-const char *treasures_path = "treasures.dat";
-const char *log_path = "log.txt";
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
-
+#define NEW_DIR_MESSAGE "New hunt directory created: "
+#define NEW_TREASURE_MESSAGE "New treasure added: "
 /*
 TODO: Implement the ADD operation.
 
@@ -71,8 +69,6 @@ operation_error add_directory(char *path) {
 
   return NO_ERROR;
 }
-
-// symlink the log file
 
 operation_error add_treasure(char *path) {
 
