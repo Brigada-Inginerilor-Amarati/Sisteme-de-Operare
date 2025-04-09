@@ -10,15 +10,15 @@ int symlink_file(const char *path) {
            path, TREASURE_FILE_NAME);
 
   char symlink_path[PATH_MAX] = "";
-  snprintf(symlink_path, sizeof(symlink_path), "%s/%s%s%s", LOG_DIRECTORY,
-           LOG_FILE_PREFIX, path, LOG_FILE_SUFFIX);
+  snprintf(symlink_path, sizeof(symlink_path), "%s/%s%s", LOG_DIRECTORY, path,
+           LOG_FILE_SUFFIX);
 
   if (access(symlink_path, F_OK) == 0) {
     return NO_ERROR;
   }
 
   if (symlink(target_path, symlink_path) == -1) {
-    perror("symlink");
+    perror("SYMLINK");
     return SYMLINK_ERROR;
   }
 

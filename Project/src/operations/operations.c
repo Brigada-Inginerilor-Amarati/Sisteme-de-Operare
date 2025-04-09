@@ -38,8 +38,10 @@ operation_error add_file(const char *path, const char *additional_path) {
     if (fd == -1) {
       write(STDERR_FILENO, "Failed to create file\n",
             strlen("Failed to create file\n"));
+      perror("File creation failed");
       return FILE_ERROR;
     }
+
     close(fd);
   }
 
@@ -63,6 +65,7 @@ operation_error add_directory(char *path) {
   if (mkdir(path, PERMISSIONS) == -1) {
     write(STDERR_FILENO, "Failed to create directory\n",
           strlen("Failed to create directory\n"));
+    perror("Could not create directory");
     return DIRECTORY_ERROR;
   }
 
