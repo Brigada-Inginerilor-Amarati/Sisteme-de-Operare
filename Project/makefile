@@ -27,11 +27,11 @@ help:
 
 add:
 	@echo "Adding new treasure hunt"
-	${EXE} --add hunt01
+	${EXE} --add hunt002
 
 ls_h:
 	@echo "Listing treasure hunts"
-	${EXE} --list hunt01
+	${EXE} --list hunt002
 
 ls_t:
 	@echo "Listing treasures"
@@ -39,7 +39,7 @@ ls_t:
 
 rm_h:
 	@echo "Removing treasure hunt"
-	${EXE} --remove hunt01
+	${EXE} --remove hunt002
 
 rm_t:
 	@echo "Removing treasure"

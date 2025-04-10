@@ -99,3 +99,12 @@ void get_list_failure_log_message(char *msg, char *path) {
 void get_list_success_log_message(char *msg, char *path) {
   snprintf(msg, LOG_MESSAGE_MAX, "LIST SUCCESS | Path: %s\n", path);
 }
+
+void get_remove_failure_log_message(char *msg, int id) {
+  snprintf(msg, LOG_MESSAGE_MAX, "REMOVE FAILURE | ITEM NOT FOUND | ID: %d\n",
+           id);
+}
+
+void get_remove_success_log_message(char *msg, int id) {
+  snprintf(msg, LOG_MESSAGE_MAX, "REMOVE SUCCESS | ID: %d\n", id);
+}

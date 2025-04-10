@@ -98,3 +98,26 @@ operation read_operation(int argc, char **argv) {
   print_error();
   return OPERATION_INVALID;
 }
+
+void print_operation_error(operation_error err) {
+  switch (err) {
+  case DIRECTORY_ERROR:
+    write(STDERR_FILENO, "Directory error\n", strlen("Directory error\n"));
+    break;
+  case FILE_ERROR:
+    write(STDERR_FILENO, "File error\n", strlen("File error\n"));
+    break;
+  case OPERATION_FAILED:
+    write(STDERR_FILENO, "Operation failed\n", strlen("Operation failed\n"));
+    break;
+  case NO_ERROR:
+    write(STDERR_FILENO, "No error\n", strlen("No error\n"));
+    break;
+  case SYMLINK_ERROR:
+    write(STDERR_FILENO, "Symlink error\n", strlen("Symlink error\n"));
+    break;
+  default:
+    write(STDERR_FILENO, "Unknown error\n", strlen("Unknown error\n"));
+    break;
+  }
+}

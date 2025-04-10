@@ -14,6 +14,7 @@
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
 
 /*
+ADD
 Parameters: <hunt_id> -> char *
 Task: Add a new treasure to the specified hunt in the treasures.csv file.
 Exception: Creates a new hunt directory if it does not exist.
@@ -103,13 +104,11 @@ operation_error add_treasure(char *path) {
 }
 
 /*
-TODO: Implement the LIST operation.
-
+LIST
 Parameters: <hunt_id> -> char *
-or
-<hunt_id>, <treasure_id> -> char * and int
-Task: List all treasures in the hunt directory.
-Task2: List the specific treasure.
+Task: List the name of the directory, the content size and the last updated time
+of the contents. List all treasures in the hunt directory. or <hunt_id>,
+<treasure_id> -> char * and int Task: List the specific treasure.
 */
 
 off_t get_directory_total_size(const char *dir_path) {
@@ -266,28 +265,55 @@ operation_error list_treasure(char *path, int id) {
 }
 
 /*
-TODO: Implement the REMOVE operation.
+REMOVE
+Parameters: <hunt_id> -> char *
+Task: Remove the hunt directory.
+Parameters: <hunt_id> -> char * and <treasure_id> -> int
+Task: Remove the specific treasure from the hunt.
 */
 
-void print_operation_error(operation_error err) {
-  switch (err) {
-  case DIRECTORY_ERROR:
-    write(STDERR_FILENO, "Directory error\n", strlen("Directory error\n"));
-    break;
-  case FILE_ERROR:
-    write(STDERR_FILENO, "File error\n", strlen("File error\n"));
-    break;
-  case OPERATION_FAILED:
-    write(STDERR_FILENO, "Operation failed\n", strlen("Operation failed\n"));
-    break;
-  case NO_ERROR:
-    write(STDERR_FILENO, "No error\n", strlen("No error\n"));
-    break;
-  case SYMLINK_ERROR:
-    write(STDERR_FILENO, "Symlink error\n", strlen("Symlink error\n"));
-    break;
-  default:
-    write(STDERR_FILENO, "Unknown error\n", strlen("Unknown error\n"));
-    break;
+operation_error remove_hunt(char *dir_name) {
+
+  char path[PATH_MAX];
+  sprintf(path, "%s/%s", TREASURE_DIRECTORY, dir_name);
+
+  char file_path[PATH_MAX];
+  sprintf(file_path, "%s/%s", path, TREASURE_FILE_NAME);
+
+  char log_path[PATH_MAX];
+  sprintf(log_path, "%s/%s", path, LOG_FILE_NAME);
+
+  // check if the directory exists
+  if (access(path, F_OK) == -1) {
+    return DIRECTORY_NOT_FOUND;
   }
+
+  // remove the treasure file
+  if (unlink(file_path) != 0) {
+    perror("REMOVE ERROR, FILE NOT FOUND");
+    return FILE_NOT_FOUND;
+  }
+
+  // remove the log file
+  if (unlink(log_path) != 0) {
+    perror("REMOVE ERROR, FILE NOT FOUND");
+    return FILE_NOT_FOUND;
+  }
+
+  // remove the directory
+  if (rmdir(path) != 0) {
+    perror("REMOVE ERROR, DIRECTORY NOT FOUND");
+    return DIRECTORY_NOT_FOUND;
+  }
+
+  char log_msg[LOG_MESSAGE_MAX];
+
+  snprintf(log_msg, LOG_MESSAGE_MAX, "Hunt %s removed successfully\n",
+           dir_name);
+
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+
+  return NO_ERROR;
 }
+
+operation_error remove_treasure(char *path, int id) { return NO_ERROR; }

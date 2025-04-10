@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/fcntl.h>
 #include <sys/syslimits.h>
 #include <unistd.h>
 
-// max length of clue + 1 for newline
-#define BUFFER_SIZE 65
+#define BUFFER_SIZE 1024
 
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;
@@ -150,10 +150,9 @@ int is_void_treasure(const treasure *t) {
 
 void print_treasure(const treasure *t) {
 #define DOUBLE_NUM_BUFFER_SIZE 32
-#define MAX_BUFFER 1024
 
   char double_nr_buffer[DOUBLE_NUM_BUFFER_SIZE];
-  char buffer[MAX_BUFFER] = "";
+  char buffer[BUFFER_SIZE] = "";
 
   sprintf(buffer, "Treasure Info:\n");
 
@@ -192,7 +191,7 @@ operation_error write_treasure_to_file(const treasure *t,
   char full_path[PATH_MAX];
   snprintf(full_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
 
-  int fd = open(full_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+  int fd = open(full_path, O_WRONLY | O_APPEND);
   if (fd == -1) {
     perror("WRITE TREASURE TO FILE ERROR");
     return FILE_ERROR;
