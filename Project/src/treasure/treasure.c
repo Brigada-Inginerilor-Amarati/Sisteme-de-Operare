@@ -1,5 +1,5 @@
 #include "treasure.h"
-#include "../log/log.h"
+#include "../utils/utils.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,8 +7,6 @@
 #include <sys/fcntl.h>
 #include <sys/syslimits.h>
 #include <unistd.h>
-
-#define BUFFER_SIZE 1024
 
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;
@@ -18,31 +16,15 @@ int is_valid_longitude(double longitude) {
   return longitude >= -180.0 && longitude <= 180.0;
 }
 
-// Helper: read a line from stdin using read()
-int read_line(char *buf, size_t size) {
-  ssize_t bytes_read = read(STDIN_FILENO, buf, size - 1);
-  if (bytes_read <= 0)
-    return 0;
-
-  buf[bytes_read] = '\0';
-
-  // Remove newline if present
-  char *newline = strchr(buf, '\n');
-  if (newline)
-    *newline = '\0';
-
-  return 1;
-}
-
-treasure create_treasure() {
+treasure create_treasure(int fd) {
   treasure void_t = {0, "\0", 0, 0.0, 0.0, "\0"};
   treasure t = void_t;
 
-  char buffer[BUFFER_SIZE];
+  char buffer[BUFSIZ];
 
   // id
   write(STDOUT_FILENO, "Enter id: ", 10);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID ID FORMAT");
     return t;
   }
@@ -56,7 +38,7 @@ treasure create_treasure() {
 
   // user_name
   write(STDOUT_FILENO, "Enter user name: ", 17);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID USER NAME FORMAT");
     return t;
   }
@@ -72,7 +54,7 @@ treasure create_treasure() {
 
   // value
   write(STDOUT_FILENO, "Enter value: ", 13);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID VALUE FORMAT");
     return t;
   }
@@ -90,7 +72,7 @@ treasure create_treasure() {
 
   // latitude
   write(STDOUT_FILENO, "Enter latitude: ", 16);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID LATITUDE FORMAT");
     return t;
   }
@@ -109,7 +91,7 @@ treasure create_treasure() {
 
   // longitude
   write(STDOUT_FILENO, "Enter longitude: ", 17);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID LONGITUDE FORMAT");
     return t;
   }
@@ -128,7 +110,7 @@ treasure create_treasure() {
 
   // clue_text
   write(STDOUT_FILENO, "Enter clue text: ", 17);
-  if (!read_line(buffer, sizeof(buffer))) {
+  if (!read_line(fd, buffer, sizeof(buffer))) {
     perror("INVALID CLUE TEXT FORMAT");
     return t;
   }
@@ -144,15 +126,14 @@ treasure create_treasure() {
 }
 
 int is_void_treasure(const treasure *t) {
-  return t->id == 0 || t->user_name[0] == '\0' || t->latitude == 0.0 ||
-         t->longitude == 0.0 || t->clue_text[0] == '\0' || t->value == 0;
+  return t->id == 0 || t->user_name[0] == '\0';
 }
 
 void print_treasure(const treasure *t) {
 #define DOUBLE_NUM_BUFFER_SIZE 32
 
   char double_nr_buffer[DOUBLE_NUM_BUFFER_SIZE];
-  char buffer[BUFFER_SIZE] = "";
+  char buffer[BUFSIZ] = "";
 
   sprintf(buffer, "Treasure Info:\n");
 
@@ -185,13 +166,9 @@ void get_treasure_string(char *buffer, const treasure *t) {
            t->user_name, t->value, t->latitude, t->longitude, t->clue_text);
 }
 
-operation_error write_treasure_to_file(const treasure *t,
-                                       const char *dir_path) {
+operation_error write_treasure_to_file(const treasure *t, const char *path) {
 
-  char full_path[PATH_MAX];
-  snprintf(full_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
-
-  int fd = open(full_path, O_WRONLY | O_APPEND);
+  int fd = open(path, O_WRONLY | O_APPEND);
   if (fd == -1) {
     perror("WRITE TREASURE TO FILE ERROR");
     return FILE_ERROR;

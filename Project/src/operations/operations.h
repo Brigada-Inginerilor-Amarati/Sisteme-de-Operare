@@ -2,13 +2,11 @@
 #ifndef __TREASURE_MANAGER_OPERATIONS_H
 #define __TREASURE_MANAGER_OPERATIONS_H
 
-#include "../treasure/treasure.h"
-#include "../treasure_manager.h"
+#include "add/op_add.h"
+#include "list/op_list.h"
+#include "remove/op_remove.h"
 
-// OP_COUNT is always the last element in the enum, and it's used to determine
-// the number of operations.
-
-operation_error add_treasure(char *path);
+operation_error add_treasure(char *path, int fd);
 
 operation_error list_hunt(char *path);
 operation_error list_treasure(char *path, int id);

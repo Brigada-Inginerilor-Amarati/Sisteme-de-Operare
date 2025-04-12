@@ -1,7 +1,4 @@
 #include "cmd_args_parser.h"
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 void print_error() {
   char *err_msg = "Usage: ./treasure_manager <operation> [operands]\nAdd "
@@ -115,6 +112,21 @@ void print_operation_error(operation_error err) {
     break;
   case SYMLINK_ERROR:
     write(STDERR_FILENO, "Symlink error\n", strlen("Symlink error\n"));
+    break;
+  case FILE_NOT_FOUND:
+    write(STDERR_FILENO, "File not found\n", strlen("File not found\n"));
+    break;
+  case TREASURE_NOT_FOUND:
+    write(STDERR_FILENO, "Treasure not found\n",
+          strlen("Treasure not found\n"));
+    break;
+  case TREASURE_ALREADY_EXISTS:
+    write(STDERR_FILENO, "Treasure already exists\n",
+          strlen("Treasure already exists\n"));
+    break;
+  case DIRECTORY_NOT_FOUND:
+    write(STDERR_FILENO, "Directory not found\n",
+          strlen("Directory not found\n"));
     break;
   default:
     write(STDERR_FILENO, "Unknown error\n", strlen("Unknown error\n"));

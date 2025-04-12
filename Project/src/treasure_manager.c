@@ -1,6 +1,7 @@
 #include "treasure_manager.h"
 #include "cmd_args_parser/cmd_args_parser.h"
 #include "operations/operations.h"
+#include <unistd.h>
 
 operation_error execute_operation(int argc, char *argv[]) {
   operation op = read_operation(argc, argv);
@@ -12,7 +13,7 @@ operation_error execute_operation(int argc, char *argv[]) {
 
   switch (op) {
   case ADD:
-    return add_treasure(hunt_id);
+    return add_treasure(hunt_id, STDIN_FILENO);
   case LIST:
     if (treasure_id == -1)
       return list_hunt(hunt_id);

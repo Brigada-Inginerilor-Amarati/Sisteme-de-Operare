@@ -4,9 +4,13 @@
 #define USER_NAME_MAX_LENGTH 16
 #define CLUE_TEXT_MAX_LENGTH 64
 
+#include <dirent.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 typedef struct {
@@ -29,7 +33,8 @@ typedef enum {
   SYMLINK_ERROR,
   OPERATION_FAILED,
   INVALID_INPUT,
-  TREASURE_NOT_FOUND
+  TREASURE_NOT_FOUND,
+  TREASURE_ALREADY_EXISTS
 } operation_error;
 
 #define TREASURE_FILE_NAME "treasures.csv"

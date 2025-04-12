@@ -8,7 +8,7 @@ init:
 
 build:
 	@echo "Building project"
-	clang -Wall -o ${EXE} src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/operations/operations.c src/treasure/treasure.c src/log/log.c
+	clang -Wall -o ${EXE} src/treasure_manager.c src/cmd_args_parser/cmd_args_parser.c src/treasure/treasure.c src/log/log.c src/operations/add/op_add.c src/operations/list/op_list.c src/operations/remove/op_remove.c src/utils/utils.c
 	@echo "Project built successfully"
 
 usage:
@@ -43,7 +43,7 @@ rm_h:
 
 rm_t:
 	@echo "Removing treasure"
-	${EXE} --remove hunt01 treasure01
+	${EXE} --remove hunt01 69
 
 clean:
 	@echo "Cleaning project"
