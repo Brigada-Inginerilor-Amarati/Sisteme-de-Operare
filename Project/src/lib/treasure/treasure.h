@@ -1,7 +1,7 @@
 #ifndef __TREASURE_H
 #define __TREASURE_H
 
-#include "../main/treasure_manager.h"
+#include "../../treasure_manager/treasure_manager.h"
 
 treasure create_treasure(int fd);
 void print_treasure(const treasure *t);

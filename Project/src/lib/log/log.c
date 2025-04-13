@@ -16,7 +16,7 @@ int symlink_file(const char *dir_name) {
     return NO_ERROR;
   }
 
-  if (symlink(target_path, symlink_path) == -1) {
+  if (symlink(target_path, symlink_path) == -1 && errno != EEXIST) {
     perror("SYMLINK");
     return SYMLINK_ERROR;
   }

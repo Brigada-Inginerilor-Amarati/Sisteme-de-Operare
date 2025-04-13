@@ -1,5 +1,7 @@
-
-EXE=./treasure_manager
+EXE = treasure_manager
+CC = clang
+CFLAGS = -Wall
+SRC = $(shell find src -name "*.c")
 
 init:
 	@echo "Initializing project"
@@ -8,7 +10,7 @@ init:
 
 build:
 	@echo "Building project"
-	clang -Wall -o ${EXE} src/main/treasure_manager.c src/parser/parser.c src/treasure/treasure.c src/log/log.c src/operations/add/add.c src/operations/list/list.c src/operations/remove/remove.c src/utils/utils.c
+	$(CC) $(CFLAGS) -o $(EXE) $(SRC)
 	@echo "Project built successfully"
 
 usage:
@@ -23,27 +25,27 @@ usage:
 	@echo "remove_treasure: Remove treasure"
 
 help:
-	${EXE} --help
+	./$(EXE) --help
 
 add:
 	@echo "Adding new treasure hunt"
-	${EXE} --add hunt002
+	./$(EXE) --add hunt01
 
 ls_h:
 	@echo "Listing treasure hunts"
-	${EXE} --list hunt002
+	./$(EXE) --list hunt002
 
 ls_t:
 	@echo "Listing treasures"
-	${EXE} --list hunt01 69
+	./$(EXE) --list hunt01 69
 
 rm_h:
 	@echo "Removing treasure hunt"
-	${EXE} --remove hunt002
+	./$(EXE) --remove hunt002
 
 rm_t:
 	@echo "Removing treasure"
-	${EXE} --remove hunt01 69
+	./$(EXE) --remove hunt01 69
 
 clean:
 	@echo "Cleaning project"
@@ -51,3 +53,5 @@ clean:
 	rm -rf logs
 	mkdir treasure_hunts
 	mkdir logs
+
+.PHONY: all build clean init help add list remove_hunt remove_treasure
