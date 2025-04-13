@@ -2,9 +2,9 @@
 #ifndef __TREASURE_MANAGER_OPERATIONS_H
 #define __TREASURE_MANAGER_OPERATIONS_H
 
-#include "add/op_add.h"
-#include "list/op_list.h"
-#include "remove/op_remove.h"
+#include "add/add.h"
+#include "list/list.h"
+#include "remove/remove.h"
 
 operation_error add_treasure(char *path, int fd);
 

@@ -1,8 +1,6 @@
-#include "op_list.h"
+#include "list.h"
 #include "../../log/log.h"
 #include "../../utils/utils.h"
-#include <sys/fcntl.h>
-#include <time.h>
 
 operation_error list_hunt(char *path) {
 

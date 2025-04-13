@@ -12,7 +12,7 @@ int symlink_file(const char *dir_name) {
   snprintf(symlink_path, sizeof(symlink_path), "%s/%s.%s", LOG_DIRECTORY,
            dir_name, LOG_FILE_NAME);
 
-  if (access(symlink_path, F_OK) == 0) {
+  if (open(symlink_path, F_OK) == 0) {
     return NO_ERROR;
   }
 

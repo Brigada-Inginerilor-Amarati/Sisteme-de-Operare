@@ -1,7 +1,6 @@
 #include "treasure_manager.h"
-#include "cmd_args_parser/cmd_args_parser.h"
-#include "operations/operations.h"
-#include <unistd.h>
+#include "../operations/operations.h"
+#include "../parser/parser.h"
 
 operation_error execute_operation(int argc, char *argv[]) {
   operation op = read_operation(argc, argv);

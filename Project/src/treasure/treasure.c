@@ -1,12 +1,5 @@
 #include "treasure.h"
 #include "../utils/utils.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/fcntl.h>
-#include <sys/syslimits.h>
-#include <unistd.h>
 
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;
@@ -162,8 +155,8 @@ void print_treasure(const treasure *t) {
 }
 
 void get_treasure_string(char *buffer, const treasure *t) {
-  snprintf(buffer, MAX_TREASURE_STRING_LENGTH, "%d,%s,%d,%lf,%lf,%s\n", t->id,
-           t->user_name, t->value, t->latitude, t->longitude, t->clue_text);
+  snprintf(buffer, BUFSIZ, "%d,%s,%d,%lf,%lf,%s\n", t->id, t->user_name,
+           t->value, t->latitude, t->longitude, t->clue_text);
 }
 
 operation_error write_treasure_to_file(const treasure *t, const char *path) {
@@ -174,7 +167,7 @@ operation_error write_treasure_to_file(const treasure *t, const char *path) {
     return FILE_ERROR;
   }
 
-  char buffer[MAX_TREASURE_STRING_LENGTH];
+  char buffer[BUFSIZ];
   get_treasure_string(buffer, t);
   write(fd, buffer, strlen(buffer));
 

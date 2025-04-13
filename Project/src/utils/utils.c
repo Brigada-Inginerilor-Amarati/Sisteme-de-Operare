@@ -1,11 +1,10 @@
 #include "utils.h"
-#include <sys/syslimits.h>
 
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
 
 operation_error add_file(const char *path) {
   // check if the file exists
-  if (access(path, F_OK) == -1) {
+  if (open(path, F_OK) == -1) {
     perror("File does not exist");
     // create the file
     int fd = open(path, O_CREAT | O_WRONLY, PERMISSIONS);

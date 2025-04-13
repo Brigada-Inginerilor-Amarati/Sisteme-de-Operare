@@ -1,8 +1,7 @@
 #ifndef __TREASURE_H
 #define __TREASURE_H
-#include "../treasure_manager.h"
 
-#define MAX_TREASURE_STRING_LENGTH 128
+#include "../main/treasure_manager.h"
 
 treasure create_treasure(int fd);
 void print_treasure(const treasure *t);

@@ -1,8 +1,6 @@
-#include "op_remove.h"
+#include "remove.h"
 #include "../../log/log.h"
 #include "../../utils/utils.h"
-#include <sys/fcntl.h>
-#include <sys/syslimits.h>
 
 operation_error remove_hunt(char *dir_name) {
   char path[PATH_MAX];

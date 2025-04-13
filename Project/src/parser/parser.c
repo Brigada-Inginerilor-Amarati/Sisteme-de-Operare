@@ -1,4 +1,4 @@
-#include "cmd_args_parser.h"
+#include "parser.h"
 
 void print_error() {
   char *err_msg = "Usage: ./treasure_manager <operation> [operands]\nAdd "

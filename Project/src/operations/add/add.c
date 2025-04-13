@@ -1,4 +1,4 @@
-#include "op_add.h"
+#include "add.h"
 #include "../../log/log.h"
 #include "../../treasure/treasure.h"
 #include "../../utils/utils.h"
@@ -34,7 +34,8 @@ operation_error add_treasure(char *path, int fd) {
 
   // check if the id already exists
   if (id_exists(treasure_file_path, t.id) == TREASURE_ALREADY_EXISTS) {
-    perror("ID ALREADY EXISTS");
+    write(STDOUT_FILENO, "Treasure ID already exists\n",
+          strlen("Treasure ID already exists\n"));
     get_add_failure_log_message(log_msg, &t);
     log_message(log_file_path, log_msg);
     return TREASURE_ALREADY_EXISTS;

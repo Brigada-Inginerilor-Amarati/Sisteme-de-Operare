@@ -1,7 +1,7 @@
 #ifndef __OP_UTILS_H
 #define __OP_UTILS_H
 
-#include "../treasure_manager.h"
+#include "../main/treasure_manager.h"
 
 ssize_t read_line(int fd, char *buf, size_t max_len);
 operation_error add_file(const char *path);
