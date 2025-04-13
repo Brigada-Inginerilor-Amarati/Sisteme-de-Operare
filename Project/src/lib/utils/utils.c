@@ -41,50 +41,30 @@ operation_error add_directory(char *path) {
   return NO_ERROR;
 }
 
-off_t get_directory_total_size(const char *dir_path) {
-  DIR *dir = opendir(dir_path);
-  if (!dir)
-    return 0;
-
-  struct dirent *entry;
-  struct stat st;
+off_t get_treasure_file_size(const char *dir_path) {
   char file_path[PATH_MAX];
-  off_t total_size = 0;
+  snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, TREASURE_FILE_NAME);
 
-  while ((entry = readdir(dir)) != NULL) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-
-    snprintf(file_path, PATH_MAX, "%s/%s", dir_path, entry->d_name);
-    if (stat(file_path, &st) == 0)
-      total_size += st.st_size;
+  struct stat st;
+  if (stat(file_path, &st) == -1) {
+    perror("stat failed for size");
+    return 0;
   }
 
-  closedir(dir);
-  return total_size;
+  return st.st_size;
 }
 
-time_t get_directory_last_modified_time(const char *dir_path) {
-  DIR *dir = opendir(dir_path);
-  if (!dir)
-    return 0;
-
-  struct dirent *entry;
-  struct stat st;
+time_t get_treasure_file_last_modified(const char *dir_path) {
   char file_path[PATH_MAX];
-  time_t latest_mtime = 0;
+  snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, TREASURE_FILE_NAME);
 
-  while ((entry = readdir(dir)) != NULL) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-
-    snprintf(file_path, PATH_MAX, "%s/%s", dir_path, entry->d_name);
-    if (stat(file_path, &st) == 0 && st.st_mtime > latest_mtime)
-      latest_mtime = st.st_mtime;
+  struct stat st;
+  if (stat(file_path, &st) == -1) {
+    perror("stat failed for modification time");
+    return 0;
   }
 
-  closedir(dir);
-  return latest_mtime;
+  return st.st_mtime;
 }
 
 ssize_t read_line(int fd, char *buf, size_t max_len) {

@@ -33,13 +33,13 @@ operation_error list_hunt(char *path) {
   write(STDOUT_FILENO, "\n", strlen("\n"));
 
   // print the total size of the directory
-  off_t total_size = get_directory_total_size(dir_path);
+  off_t total_size = get_treasure_file_size(dir_path);
   char total_size_str[BUFSIZ];
   snprintf(total_size_str, BUFSIZ, "Total size: %llu bytes\n", total_size);
   write(STDOUT_FILENO, total_size_str, strlen(total_size_str));
 
   // print the last modification time
-  time_t latest_mtime = get_directory_last_modified_time(dir_path);
+  time_t latest_mtime = get_treasure_file_last_modified(dir_path);
   char *time_str = ctime(&latest_mtime);
   if (time_str != NULL) {
     write(STDOUT_FILENO, "Last modified: ", strlen("Last modified: "));
