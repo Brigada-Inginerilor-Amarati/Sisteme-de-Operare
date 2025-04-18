@@ -4,7 +4,7 @@
 
 int main(void) {
 
-  char *args[] = {"treasure_manager", "--list", NULL};
+  char *args[] = {"treasure_manager", "--help", NULL};
 
   pid_t child_pid = fork();
 
@@ -14,8 +14,8 @@ int main(void) {
   }
 
   if (child_pid == 0) {
-    execvp("bin/treasure_manager", args);
-    perror("execlp");
+    execv("bin/treasure_manager", args);
+    perror("execution of treasure_manager failed");
     exit(EXIT_FAILURE);
   }
 
