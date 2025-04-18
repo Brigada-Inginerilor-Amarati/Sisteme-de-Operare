@@ -42,7 +42,7 @@ void print_operation(operation op) {
   write(1, "Operation: ", 11);
   switch (op) {
   case HELP:
-    write(1, "DELETE", 6);
+    write(1, "HELP", 4);
     break;
   case ADD:
     write(1, "ADD", 3);
@@ -69,28 +69,24 @@ int get_treasure_id(int argc, char **argv) {
 }
 
 operation read_operation(int argc, char **argv) {
-  if (argc < 2) {
-    print_error();
+  if (argc < 2)
     return OPERATION_INVALID;
-  }
 
   // HELP
-  if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-    print_help();
+  if (argc == 2 && strcmp(argv[1], "--help") == 0)
     return HELP;
-  }
 
   // ADD
   if (argc == 3 && strcmp(argv[1], "--add") == 0)
     return ADD;
 
-  // LIST
-  if ((argc == 3 || argc == 4) && strcmp(argv[1], "--list") == 0)
-    return LIST;
-
   // REMOVE
   if ((argc == 3 || argc == 4) && strcmp(argv[1], "--remove") == 0)
     return REMOVE;
+
+  // LIST
+  if (strcmp(argv[1], "--list") == 0)
+    return LIST;
 
   print_error();
   return OPERATION_INVALID;

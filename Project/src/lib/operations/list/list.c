@@ -119,24 +119,6 @@ operation_error list_treasure(char *path, int id) {
   return TREASURE_NOT_FOUND;
 }
 
-int get_treasure_count(char *path) {
-  // returns the treasure count from a specific hunt directory
-  char treasure_file_path[PATH_MAX];
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
-           TREASURE_FILE_NAME);
-
-  int fd = open(treasure_file_path, O_RDONLY);
-  if (fd == -1) {
-    perror("LIST ERROR, FILE NOT FOUND");
-    return FILE_NOT_FOUND;
-  }
-
-  // line count == treasure count
-
-  close(fd);
-  return 0;
-}
-
 operation_error list_hunts() {
   // open the treasure_hunts directory and list all the directories inside
   DIR *dir;

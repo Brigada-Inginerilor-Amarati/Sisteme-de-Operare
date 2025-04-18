@@ -115,3 +115,25 @@ operation_error id_exists(char *path, int id) {
 
   return NO_ERROR;
 }
+
+int get_treasure_count(char *path) {
+  char treasure_file_path[PATH_MAX];
+  snprintf(treasure_file_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
+           TREASURE_FILE_NAME);
+
+  int fd = open(treasure_file_path, O_RDONLY);
+  if (fd == -1) {
+    perror("LIST ERROR, FILE NOT FOUND");
+    return FILE_NOT_FOUND;
+  }
+
+  int line_count = 0;
+  char line[BUFSIZ];
+  ssize_t bytes_read;
+
+  while ((bytes_read = read_line(fd, line, BUFSIZ)) > 0)
+    line_count++;
+
+  close(fd);
+  return line_count;
+}

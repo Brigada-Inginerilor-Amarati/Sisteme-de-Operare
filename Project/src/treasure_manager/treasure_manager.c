@@ -11,10 +11,15 @@ operation_error execute_operation(int argc, char *argv[]) {
   int treasure_id = get_treasure_id(argc, argv);
 
   switch (op) {
+  case HELP:
+    print_help();
+    return NO_ERROR;
   case ADD:
     return add_treasure(hunt_id, STDIN_FILENO);
   case LIST:
-    if (treasure_id == -1)
+    if (hunt_id == NULL)
+      return list_hunts();
+    else if (treasure_id == -1)
       return list_hunt(hunt_id);
     else
       return list_treasure(hunt_id, treasure_id);
@@ -30,10 +35,8 @@ operation_error execute_operation(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-  // operation_error err = execute_operation(argc, argv);
-  // print_operation_error(err);
-
-  operation_error err = list_hunts();
+  operation_error err = execute_operation(argc, argv);
+  print_operation_error(err);
 
   return 0;
 }

@@ -11,5 +11,6 @@ off_t get_treasure_file_size(const char *dir_path);
 time_t get_treasure_file_last_modified(const char *dir_path);
 int extract_id(char *string);
 operation_error id_exists(char *dir_path, int id);
+int get_treasure_count(char *path);
 
 #endif

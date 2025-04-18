@@ -6,4 +6,5 @@
 operation_error list_hunt(char *path);
 operation_error list_treasure(char *path, int id);
 operation_error list_hunts();
+
 #endif
