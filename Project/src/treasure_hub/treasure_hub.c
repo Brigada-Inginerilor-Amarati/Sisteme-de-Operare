@@ -1,3 +1,29 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(void) {
+
+  char *args[] = {"treasure_manager", "--list", NULL};
+
+  pid_t child_pid = fork();
+
+  if (child_pid < 0) {
+    perror("fork");
+    exit(EXIT_FAILURE);
+  }
+
+  if (child_pid == 0) {
+    execvp("bin/treasure_manager", args);
+    perror("execlp");
+    exit(EXIT_FAILURE);
+  }
+
+  waitpid(child_pid, NULL, 0);
+
+  printf("Finished executing treasure_manager\n");
+  return 0;
+}
 
 /*
 #include <errno.h>

@@ -1,20 +1,37 @@
 #include "parser.h"
 
-void print_error() {
-  char *err_msg = "Usage: ./treasure_manager <operation> [operands]\nAdd "
-                  "--help for more information.";
-  write(2, err_msg, strlen(err_msg));
-}
-
 void print_help() {
-  char *help_msg =
-      "Usage: ./treasure_manager <operation> [operands]\n\t--add <hunt_id> - "
-      "to add a treasure to the "
-      "selected hunt.\n\t--list <hunt_id> - to list all treasures within the "
-      "selected hunt.\n\t--list <hunt_id> <treasure_id> - to list a specific "
-      "treasure within the selected hunt.\n\t--remove <hunt_id> <treasure_id> "
-      "- to remove a specific treasure from the selected hunt.\n\t--remove "
-      "<hunt_id> - to remove all treasures from the selected hunt.\n";
+  char *usage_msg = "Usage: ./treasure_manager <operation> [operands]\n";
+
+  char *list_msg1 = "--list -> Lists all treasure hunts and the number of "
+                    "treasures inside each hunt\n";
+  char *list_msg2 =
+      "--list <hunt_id> -> Lists all treasures inside the specified hunt\n";
+  char *list_msg3 = "--list <hunt_id> <treasure_id> -> Lists the specified "
+                    "treasure inside the specified hunt\n";
+
+  char *add_msg1 = "--add <hunt_id> <treasure_id> -> Adds the specified "
+                   "treasure to the specified hunt\n";
+
+  char *add_msg2 = "If the hunt does not exist, it will be created.\n";
+
+  char *add_msg3 = "If there is a treasure with the same ID in the hunt, an "
+                   "error will occur.\n";
+
+  char *remove_msg1 =
+      "--remove <hunt_id> -> Removes the entire hunt directory\n";
+  char *remove_msg2 = "--remove <hunt_id> <treasure_id> -> Removes the "
+                      "specified treasure from the specified hunt\n";
+  char *remove_msg3 = "If the hunt does not exist, an error will occur.\n";
+  char *remove_msg4 =
+      "If the treasure does not exist in the hunt, an error will occur.\n";
+
+  char help_msg[BUFSIZ];
+
+  snprintf(help_msg, BUFSIZ, "%s%s%s%s%s%s%s%s%s%s%s", usage_msg, list_msg1,
+           list_msg2, list_msg3, add_msg1, add_msg2, add_msg3, remove_msg1,
+           remove_msg2, remove_msg3, remove_msg4);
+
   write(1, help_msg, strlen(help_msg));
 }
 
@@ -88,7 +105,7 @@ operation read_operation(int argc, char **argv) {
   if (strcmp(argv[1], "--list") == 0)
     return LIST;
 
-  print_error();
+  print_help();
   return OPERATION_INVALID;
 }
 

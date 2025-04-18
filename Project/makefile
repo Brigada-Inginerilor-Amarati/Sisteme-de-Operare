@@ -1,7 +1,11 @@
-EXE = treasure_manager
+BIN = bin
+BIN_MANAGER = treasure_manager
+BIN_HUB = treasure_hub
 CC = clang
 CFLAGS = -Wall
-SRC = $(shell find src -name "*.c")
+SRC_MANAGER = $(shell find src/treasure_manager -name "*.c")
+SRC_HUB = $(shell find src/treasure_hub -name "*.c")
+SRC_UTILS = $(shell find src/lib -name "*.c")
 
 init:
 	@echo "Initializing project"
@@ -10,7 +14,8 @@ init:
 
 build:
 	@echo "Building project"
-	$(CC) $(CFLAGS) -o $(EXE) $(SRC)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MANAGER) $(SRC_UTILS) $(SRC_MANAGER)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_HUB) $(SRC_UTILS) $(SRC_HUB)
 	@echo "Project built successfully"
 
 usage:
@@ -25,27 +30,27 @@ usage:
 	@echo "remove_treasure: Remove treasure"
 
 help:
-	./$(EXE) --help
+	$(BIN)/$(BIN_MANAGER) --help
 
 add:
 	@echo "Adding new treasure hunt"
-	./$(EXE) --add hunt01
+	$(BIN)/$(BIN_MANAGER) --add hunt01
 
 ls_h:
 	@echo "Listing treasure hunts"
-	./$(EXE) --list hunt002
+	$(BIN)/$(BIN_MANAGER) --list hunt002
 
 ls_t:
 	@echo "Listing treasures"
-	./$(EXE) --list hunt01 69
+	$(BIN)/$(BIN_MANAGER) --list hunt01 69
 
 rm_h:
 	@echo "Removing treasure hunt"
-	./$(EXE) --remove hunt002
+	$(BIN)/$(BIN_MANAGER) --remove hunt002
 
 rm_t:
 	@echo "Removing treasure"
-	./$(EXE) --remove hunt01 69
+	$(BIN)/$(BIN_MANAGER) --remove hunt01 69
 
 clean:
 	@echo "Cleaning project"

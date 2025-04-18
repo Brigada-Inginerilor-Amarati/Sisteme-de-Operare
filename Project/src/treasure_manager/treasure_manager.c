@@ -11,9 +11,6 @@ operation_error execute_operation(int argc, char *argv[]) {
   int treasure_id = get_treasure_id(argc, argv);
 
   switch (op) {
-  case HELP:
-    print_help();
-    return NO_ERROR;
   case ADD:
     return add_treasure(hunt_id, STDIN_FILENO);
   case LIST:
@@ -29,6 +26,7 @@ operation_error execute_operation(int argc, char *argv[]) {
     else
       return remove_treasure(hunt_id, treasure_id);
   default:
+    print_help();
     return NO_ERROR;
   }
 }
