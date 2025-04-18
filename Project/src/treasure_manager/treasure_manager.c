@@ -30,8 +30,10 @@ operation_error execute_operation(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-  operation_error err = execute_operation(argc, argv);
-  print_operation_error(err);
+  // operation_error err = execute_operation(argc, argv);
+  // print_operation_error(err);
+
+  operation_error err = list_hunts();
 
   return 0;
 }

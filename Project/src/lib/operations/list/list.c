@@ -1,6 +1,7 @@
 #include "list.h"
 #include "../../log/log.h"
 #include "../../utils/utils.h"
+#include <sys/syslimits.h>
 
 operation_error list_hunt(char *path) {
 
@@ -116,4 +117,48 @@ operation_error list_treasure(char *path, int id) {
   get_search_failure_log_message(log_msg, id);
   log_message(log_file_path, log_msg);
   return TREASURE_NOT_FOUND;
+}
+
+int get_treasure_count(char *path) {
+  // returns the treasure count from a specific hunt directory
+  char treasure_file_path[PATH_MAX];
+  snprintf(treasure_file_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
+           TREASURE_FILE_NAME);
+
+  int fd = open(treasure_file_path, O_RDONLY);
+  if (fd == -1) {
+    perror("LIST ERROR, FILE NOT FOUND");
+    return FILE_NOT_FOUND;
+  }
+
+  // line count == treasure count
+
+  close(fd);
+  return 0;
+}
+
+operation_error list_hunts() {
+  // open the treasure_hunts directory and list all the directories inside
+  DIR *dir;
+  struct dirent *entry;
+
+  dir = opendir(TREASURE_DIRECTORY);
+  if (dir == NULL) {
+    perror("LIST ERROR, DIRECTORY NOT FOUND");
+    return DIRECTORY_NOT_FOUND;
+  }
+
+  char msg[BUFSIZ];
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 &&
+        strcmp(entry->d_name, "..") != 0) {
+      snprintf(msg, BUFSIZ, "Hunt %s: \nTreasure count: %d\n", entry->d_name,
+               get_treasure_count(entry->d_name));
+      write(STDOUT_FILENO, msg, strlen(msg));
+    }
+  }
+
+  closedir(dir);
+  return NO_ERROR;
 }
