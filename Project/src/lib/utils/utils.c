@@ -41,28 +41,18 @@ operation_error add_directory(char *path) {
   return NO_ERROR;
 }
 
-off_t get_treasure_file_size(const char *dir_path) {
-  char file_path[PATH_MAX];
-  snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, TREASURE_FILE_NAME);
-
+off_t get_treasure_file_size(const char *path) {
   struct stat st;
-  if (stat(file_path, &st) == -1) {
-    perror("stat failed for size");
+  if (stat(path, &st) == -1)
     return 0;
-  }
 
   return st.st_size;
 }
 
-time_t get_treasure_file_last_modified(const char *dir_path) {
-  char file_path[PATH_MAX];
-  snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, TREASURE_FILE_NAME);
-
+time_t get_treasure_file_last_modified(const char *path) {
   struct stat st;
-  if (stat(file_path, &st) == -1) {
-    perror("stat failed for modification time");
+  if (stat(path, &st) == -1)
     return 0;
-  }
 
   return st.st_mtime;
 }
@@ -92,27 +82,20 @@ ssize_t read_line(int fd, char *buf, size_t max_len) {
   return i;
 }
 
-int extract_id(char *string) {
-  int id = 0;
-  // the id is the first number in the string
-  sscanf(string, "%d", &id);
-  return id;
-}
-
-operation_error id_exists(char *path, int id) {
-  int fd = open(path, O_RDONLY);
-  if (fd == -1) {
-    perror("Could not open file");
+operation_error id_exists(char *file_path, int id) {
+  int fd = open(file_path, O_RDONLY);
+  if (fd == -1)
     return FILE_ERROR;
-  }
 
-  char line[LINE_MAX];
-  while (read_line(fd, line, LINE_MAX)) {
-    int line_id = extract_id(line);
-    if (line_id == id)
+  treasure t;
+  while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
+    if (t.id == id) {
+      close(fd);
       return TREASURE_ALREADY_EXISTS;
+    }
   }
 
+  close(fd);
   return NO_ERROR;
 }
 
@@ -127,13 +110,13 @@ int get_treasure_count(char *path) {
     return FILE_NOT_FOUND;
   }
 
-  int line_count = 0;
-  char line[BUFSIZ];
-  ssize_t bytes_read;
+  int count = 0;
+  treasure t;
 
-  while ((bytes_read = read_line(fd, line, BUFSIZ)) > 0)
-    line_count++;
+  while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
+    count++;
+  }
 
   close(fd);
-  return line_count;
+  return count;
 }

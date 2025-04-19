@@ -6,20 +6,20 @@ int main(void) {
 
   char *args[] = {"treasure_manager", "--help", NULL};
 
-  pid_t child_pid = fork();
+  pid_t monitor_pid = fork();
 
-  if (child_pid < 0) {
+  if (monitor_pid < 0) {
     perror("fork");
     exit(EXIT_FAILURE);
   }
 
-  if (child_pid == 0) {
-    execv("bin/treasure_manager", args);
-    perror("execution of treasure_manager failed");
+  if (monitor_pid == 0) {
+    execv("bin/monitor", args);
+    perror("execution of monitor failed");
     exit(EXIT_FAILURE);
   }
 
-  waitpid(child_pid, NULL, 0);
+  waitpid(monitor_pid, NULL, 0);
 
   printf("Finished executing treasure_manager\n");
   return 0;

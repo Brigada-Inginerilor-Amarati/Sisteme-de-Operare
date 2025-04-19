@@ -1,7 +1,7 @@
 #include "list.h"
 #include "../../log/log.h"
+#include "../../treasure/treasure.h"
 #include "../../utils/utils.h"
-#include <sys/syslimits.h>
 
 operation_error list_hunt(char *path) {
 
@@ -34,24 +34,35 @@ operation_error list_hunt(char *path) {
   write(STDOUT_FILENO, "\n", strlen("\n"));
 
   // print the total size of the directory
-  off_t total_size = get_treasure_file_size(dir_path);
+  off_t total_size = get_treasure_file_size(path);
   char total_size_str[BUFSIZ];
   snprintf(total_size_str, BUFSIZ, "Total size: %llu bytes\n", total_size);
   write(STDOUT_FILENO, total_size_str, strlen(total_size_str));
 
   // print the last modification time
-  time_t latest_mtime = get_treasure_file_last_modified(dir_path);
-  char *time_str = ctime(&latest_mtime);
-  if (time_str != NULL) {
-    write(STDOUT_FILENO, "Last modified: ", strlen("Last modified: "));
-    write(STDOUT_FILENO, time_str, strlen(time_str));
+  time_t latest_mtime = get_treasure_file_last_modified(path);
+  if (latest_mtime == 0)
+    write(STDOUT_FILENO, "Last modified: N/A\n",
+          strlen("Last modified: N/A\n"));
+  else {
+    char *time_str = ctime(&latest_mtime);
+    if (time_str != NULL) {
+      write(STDOUT_FILENO, "Last modified: ", strlen("Last modified: "));
+      write(STDOUT_FILENO, time_str, strlen(time_str));
+    }
   }
 
-  char buffer[BUFSIZ];
-  ssize_t bytes_read;
-  while ((bytes_read = read(fd, buffer, BUFSIZ)) > 0) {
-    write(STDOUT_FILENO, buffer, bytes_read);
+  // read and print each treasure in binary
+  treasure t;
+  int count = 0;
+  while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
+    write(STDOUT_FILENO, "\n--- Treasure Entry ---\n", 24);
+    print_treasure(&t);
+    count++;
   }
+
+  if (count == 0)
+    write(STDOUT_FILENO, "\nNo treasures found.\n", 22);
 
   close(fd);
   get_list_success_log_message(log_msg, path);
@@ -85,30 +96,16 @@ operation_error list_treasure(char *path, int id) {
     return FILE_NOT_FOUND;
   }
 
-  char ch;
-  char line[BUFSIZ];
-  int line_idx = 0;
-  ssize_t bytes_read;
-
-  // Citește caracter cu caracter
-  while ((bytes_read = read(fd, &ch, 1)) == 1) {
-    if (ch == '\n' || line_idx >= BUFSIZ - 1) {
-      // Final de linie -> termină stringul
-      line[line_idx] = '\0';
-
-      // Extrage și compară id
-      if (extract_id(line) == id) {
-        write(STDOUT_FILENO, line, strlen(line));
-        write(STDOUT_FILENO, "\n", 1);
-        get_search_success_log_message(log_msg, id);
-        log_message(log_file_path, log_msg);
-        close(fd);
-        return NO_ERROR;
-      }
-
-      line_idx = 0;
-    } else {
-      line[line_idx++] = ch;
+  treasure t;
+  while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
+    if (t.id == id) {
+      write(STDOUT_FILENO, "--- Treasure Found ---\n",
+            strlen("--- Treasure Found ---\n"));
+      print_treasure(&t);
+      get_search_success_log_message(log_msg, id);
+      log_message(log_file_path, log_msg);
+      close(fd);
+      return NO_ERROR;
     }
   }
 

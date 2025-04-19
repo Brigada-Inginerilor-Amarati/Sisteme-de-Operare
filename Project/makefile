@@ -1,10 +1,12 @@
 BIN = bin
 BIN_MANAGER = treasure_manager
 BIN_HUB = treasure_hub
+BIN_MONITOR = monitor
 CC = clang
 CFLAGS = -Wall
 SRC_MANAGER = $(shell find src/treasure_manager -name "*.c")
-SRC_HUB = $(shell find src/treasure_hub -name "*.c")
+SRC_HUB = src/treasure_hub/shell.c
+SRC_MONITOR = src/treasure_hub/monitor.c
 SRC_UTILS = $(shell find src/lib -name "*.c")
 
 init:
@@ -16,6 +18,7 @@ build:
 	@echo "Building project"
 	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MANAGER) $(SRC_UTILS) $(SRC_MANAGER)
 	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_HUB) $(SRC_UTILS) $(SRC_HUB)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MONITOR) $(SRC_UTILS) $(SRC_MONITOR)
 	@echo "Project built successfully"
 
 usage:

@@ -1,8 +1,8 @@
 #ifndef __TREASURE_MANAGER_H
 #define __TREASURE_MANAGER_H
 
-#define USER_NAME_MAX_LENGTH 16
-#define CLUE_TEXT_MAX_LENGTH 64
+#define USER_NAME_MAX_LENGTH 24
+#define CLUE_TEXT_MAX_LENGTH 80
 
 #include <dirent.h>
 #include <errno.h>
@@ -24,6 +24,8 @@ typedef struct {
   char clue_text[CLUE_TEXT_MAX_LENGTH];
 } treasure;
 
+// 128 bytes, no padding needed
+
 typedef enum { OPERATION_INVALID, HELP, ADD, LIST, REMOVE } operation;
 
 typedef enum {
@@ -39,7 +41,7 @@ typedef enum {
   TREASURE_ALREADY_EXISTS
 } operation_error;
 
-#define TREASURE_FILE_NAME "treasures.csv"
+#define TREASURE_FILE_NAME "treasures.bin"
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define LOG_DIRECTORY "logs"
 #define LOG_FILE_NAME "log"

@@ -29,8 +29,15 @@ operation_error add_treasure(char *path, int fd) {
   if (symlink_file(path) != NO_ERROR)
     return SYMLINK_ERROR;
 
-  treasure t = create_treasure(fd);
+  treasure t;
   char log_msg[LOG_MESSAGE_MAX] = "";
+  operation_error err = create_treasure(&t, fd);
+
+  if (err != NO_ERROR) {
+    get_add_failure_log_message(log_msg, &t);
+    log_message(log_file_path, log_msg);
+    return err;
+  }
 
   // check if the id already exists
   if (id_exists(treasure_file_path, t.id) == TREASURE_ALREADY_EXISTS) {
@@ -41,12 +48,7 @@ operation_error add_treasure(char *path, int fd) {
     return TREASURE_ALREADY_EXISTS;
   }
 
-  if (is_void_treasure(&t)) {
-    get_add_failure_log_message(log_msg, &t);
-    log_message(log_file_path, log_msg);
-    return INVALID_INPUT;
-  }
-
+  // write the treasure to the file
   if (write_treasure_to_file(&t, treasure_file_path) != NO_ERROR) {
     get_add_killed_log_message(log_msg, &t);
     log_message(log_file_path, log_msg);
