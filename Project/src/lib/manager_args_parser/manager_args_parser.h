@@ -1,5 +1,5 @@
-#ifndef __CMD_LINE_ARGS_PARSER_H
-#define __CMD_LINE_ARGS_PARSER_H
+#ifndef __MANAGER_ARGS_PARSER_H
+#define __MANAGER_ARGS_PARSER_H
 
 #include "../operations/operations.h"
 #include "../utils/utils.h"

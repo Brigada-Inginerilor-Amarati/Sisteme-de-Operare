@@ -5,6 +5,7 @@
 
 operation_error list_hunt(char *path) {
 
+  // prepare the path variables
   char log_msg[LOG_MESSAGE_MAX];
   char dir_path[PATH_MAX];
   char treasure_file_path[PATH_MAX];
@@ -52,7 +53,7 @@ operation_error list_hunt(char *path) {
     }
   }
 
-  // read and print each treasure in binary
+  // read and print each treasure
   treasure t;
   int count = 0;
   while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
@@ -61,9 +62,11 @@ operation_error list_hunt(char *path) {
     count++;
   }
 
+  // in case of no treasures found
   if (count == 0)
     write(STDOUT_FILENO, "\nNo treasures found.\n", 22);
 
+  // end the list operation
   close(fd);
   get_list_success_log_message(log_msg, path);
   log_message(log_file_path, log_msg);
@@ -72,9 +75,8 @@ operation_error list_hunt(char *path) {
 }
 
 operation_error list_treasure(char *path, int id) {
-  if (id == 0)
-    return TREASURE_NOT_FOUND;
 
+  // prepare the path variables
   char log_msg[LOG_MESSAGE_MAX];
   char dir_path[PATH_MAX];
   char treasure_file_path[PATH_MAX];
@@ -83,11 +85,13 @@ operation_error list_treasure(char *path, int id) {
   snprintf(treasure_file_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
   snprintf(log_file_path, PATH_MAX, "%s/%s", dir_path, LOG_FILE_NAME);
 
+  // check if the directory exists
   if (open(dir_path, O_DIRECTORY) == -1) {
     perror("LIST ERROR, DIRECTORY NOT FOUND");
     return DIRECTORY_NOT_FOUND;
   }
 
+  // check if the treasure file exists
   int fd = open(treasure_file_path, O_RDONLY);
   if (fd == -1) {
     get_search_killed_log_message(log_msg, id);
@@ -96,12 +100,15 @@ operation_error list_treasure(char *path, int id) {
     return FILE_NOT_FOUND;
   }
 
+  // write the data to stdout
   treasure t;
   while (read(fd, &t, sizeof(treasure)) == sizeof(treasure)) {
     if (t.id == id) {
       write(STDOUT_FILENO, "--- Treasure Found ---\n",
             strlen("--- Treasure Found ---\n"));
+
       print_treasure(&t);
+      // end the search, treasure found
       get_search_success_log_message(log_msg, id);
       log_message(log_file_path, log_msg);
       close(fd);
@@ -109,18 +116,20 @@ operation_error list_treasure(char *path, int id) {
     }
   }
 
+  // end the search, no treasure found
   close(fd);
-
   get_search_failure_log_message(log_msg, id);
   log_message(log_file_path, log_msg);
   return TREASURE_NOT_FOUND;
 }
 
 operation_error list_hunts() {
+
   // open the treasure_hunts directory and list all the directories inside
   DIR *dir;
   struct dirent *entry;
 
+  // check if the treasure_hunts directory exists
   dir = opendir(TREASURE_DIRECTORY);
   if (dir == NULL) {
     perror("LIST ERROR, DIRECTORY NOT FOUND");
@@ -129,15 +138,19 @@ operation_error list_hunts() {
 
   char msg[BUFSIZ];
 
+  // parse the directory entries
   while ((entry = readdir(dir)) != NULL) {
     if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 &&
         strcmp(entry->d_name, "..") != 0) {
+
+      // print the hunt name and treasure count from each entry
       snprintf(msg, BUFSIZ, "Hunt %s: \nTreasure count: %d\n", entry->d_name,
                get_treasure_count(entry->d_name));
       write(STDOUT_FILENO, msg, strlen(msg));
     }
   }
 
+  // end the hunt listing
   closedir(dir);
   return NO_ERROR;
 }

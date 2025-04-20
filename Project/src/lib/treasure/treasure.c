@@ -1,9 +1,6 @@
 #include "treasure.h"
 #include "../utils/utils.h"
 
-#include <sys/fcntl.h>
-#include <unistd.h>
-
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;
 }
