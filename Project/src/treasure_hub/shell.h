@@ -20,7 +20,6 @@
 
 #define DELAY_START_MONITOR 1000000
 #define TIME_BUFFER_SIZE 32
-#define CMD_FIFO_PATH "/tmp/treasure_hub_cmds.fifo"
 #define FIFO_PERMISSIONS                                                       \
   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 

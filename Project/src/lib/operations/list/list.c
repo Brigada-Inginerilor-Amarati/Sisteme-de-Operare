@@ -117,6 +117,7 @@ operation_error list_treasure(char *path, int id) {
   }
 
   // end the search, no treasure found
+  perror("LIST ERROR, TREASURE NOT FOUND");
   close(fd);
   get_search_failure_log_message(log_msg, id);
   log_message(log_file_path, log_msg);

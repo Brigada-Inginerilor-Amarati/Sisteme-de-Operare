@@ -38,8 +38,8 @@ void setup_signal_handlers(void) {
 }
 
 void sig_refresh_handler(int sig) {
-  usleep(100000);
-  write(STDOUT_FILENO, "\r", 1);
+  // signal to activate the stdin in the shell
+  write(STDOUT_FILENO, "\r\033[K", 4);
 }
 
 void sigchld_handler(int sig) {

@@ -17,7 +17,6 @@ char line_buf[LINE_BUF_SIZE];
 //=============================================================================
 void handle_sigterm(int signum);
 void setup_signal_handlers(void);
-ssize_t read_command(void);
 void debug_dump(ssize_t n);
 void execute_command(const char *cmd);
 void read_and_execute(void);
@@ -28,7 +27,7 @@ void monitor_loop(void);
 //=============================================================================
 void handle_sigterm(int signum) {
   // Shutdown signal received
-  dprintf(STDOUT_FILENO, "[MONITOR] Received shutdown signal (%d)\n", signum);
+  dprintf(STDOUT_FILENO, "\n[MONITOR] Received shutdown signal (%d)\n", signum);
   running = 0;
 }
 
@@ -51,10 +50,6 @@ void setup_signal_handlers(void) {
 //=============================================================================
 // Command Reading & Execution
 //=============================================================================
-ssize_t read_command(void) {
-  return read_line(STDIN_FILENO, line_buf, LINE_BUF_SIZE);
-}
-
 void debug_dump(ssize_t n) {
   dprintf(STDERR_FILENO, "[DEBUG] read_line → %zd bytes: \"%.*s\"\n", n, (int)n,
           line_buf);
@@ -79,7 +74,6 @@ void execute_manager(const char *cmd) {
   // Parent waits for the child
   waitpid(pid, NULL, 0);
 
-  // refresh the terminal
   kill(getppid(), SIGUSR1);
 }
 
@@ -90,7 +84,7 @@ void monitor_loop(void) {
   while (running) {
     ssize_t n = read_line(STDIN_FILENO, line_buf, LINE_BUF_SIZE);
     if (n <= 0) {
-      perror("monitor: read_line");
+      // perror("monitor: read_line");
       break;
     }
     // Strip newline
@@ -113,13 +107,13 @@ int main(void) {
   setup_signal_handlers();
 
   // Announce startup
-  dprintf(STDOUT_FILENO, "[MONITOR] Monitor started (PID: %d)\n", getpid());
+  dprintf(STDOUT_FILENO, "\n[MONITOR] Monitor started (PID: %d)\n", getpid());
 
   // Enter main loop
   monitor_loop();
 
-  sleep(1);
+  sleep(10);
 
-  dprintf(STDOUT_FILENO, "[MONITOR] Shutting down.\n");
+  dprintf(STDOUT_FILENO, "\n[MONITOR] Shutting down.\n");
   return EXIT_SUCCESS;
 }
