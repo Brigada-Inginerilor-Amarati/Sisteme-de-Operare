@@ -1,7 +1,37 @@
 #ifndef __SHELL_COMMANDS_H
 #define __SHELL_COMMANDS_H
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+
+//=============================================================================
+// Defines & Constants
+//=============================================================================
+
+#define DELAY_START_MONITOR 1000000
+#define TIME_BUFFER_SIZE 32
+#define CMD_FIFO_PATH "/tmp/treasure_hub_cmds.fifo"
+#define FIFO_PERMISSIONS                                                       \
+  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+
+#define LIST_HUNTS_ARGC 1
+#define LIST_TREASURES_ARGC 2
+#define VIEW_TREASURE_ARGC 3
+#define MAX_ARGS 10
+
+//=============================================================================
+// Structs
+//=============================================================================
 
 typedef enum {
   CMD_INVALID,
@@ -15,10 +45,21 @@ typedef enum {
   CMD_VIEW_TREASURE
 } shell_command;
 
-typedef enum { MON_STOPPED = 0, MON_RUNNING, MON_STOPPING } monitor_state;
+typedef struct {
+  pid_t monitor_pid;
+  enum { MON_STOPPED, MON_RUNNING, MON_STOPPING } state;
+} shell_t;
 
-#define MAX_ARGS 10
-extern pid_t monitor_pid;
-extern monitor_state mon_state;
+//=============================================================================
+// External Variables
+//=============================================================================
+
+extern shell_t shell;
+
+//=============================================================================
+// Functions
+//=============================================================================
+
+void ensure_cmd_fifo(void);
 
 #endif

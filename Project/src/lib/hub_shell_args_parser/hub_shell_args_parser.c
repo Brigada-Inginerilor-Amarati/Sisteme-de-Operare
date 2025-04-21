@@ -4,11 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 
-pid_t monitor_pid = -1;
-monitor_state mon_state = MON_STOPPED;
+shell_t shell = {.monitor_pid = -1, .state = MON_STOPPED};
 char log_msg[BUFSIZ];
 
-void print_help_info() {
+void cmd_print_help() {
   char *usage_msg = "Usage: bin/treasure_hub\n\n";
 
   char *start_msg = "start_monitor -> starts a separate background process "
@@ -40,8 +39,8 @@ void print_help_info() {
   write(1, help_msg, strlen(help_msg));
 }
 
-shell_command parse_shell_cmd(char *string, char args[][BUFSIZ]) {
-  int argc = 0;
+shell_command parse_shell_cmd(char *string, char args[][BUFSIZ], int *argc) {
+  *argc = 0;
 
   // init the args array
 
@@ -75,29 +74,14 @@ shell_command parse_shell_cmd(char *string, char args[][BUFSIZ]) {
   if (cmd == CMD_INVALID)
     return CMD_INVALID;
 
-  strcpy(args[(argc)++], token); // Store the command itself
+  strcpy(args[(*argc)++], token);
 
   // Collect additional arguments
-  while ((token = strtok(NULL, " \n")) != NULL && argc < 3) {
-    strcpy(args[argc], token);
-    argc++;
+  while ((token = strtok(NULL, " \n")) != NULL && *argc < 3) {
+    strcpy(args[(*argc)++], token);
   }
 
   return cmd;
 }
 
-void clear_screen() { write(STDOUT_FILENO, "\033[2J\033[H", 7); }
-
-void exit_shell() {
-  if (mon_state == MON_RUNNING) {
-    snprintf(log_msg, BUFSIZ,
-             "Cannot exit while monitor is running. Use stop_monitor first.\n");
-    write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    return;
-  }
-
-  snprintf(log_msg, BUFSIZ, "Exiting treasure_hub shell\n");
-  write(STDOUT_FILENO, log_msg, strlen(log_msg));
-
-  exit(0);
-}
+void cmd_clear_screen() { write(STDOUT_FILENO, "\033[2J\033[H", 7); }

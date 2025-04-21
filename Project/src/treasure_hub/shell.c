@@ -1,190 +1,319 @@
 #include "shell.h"
 #include "../lib/hub_shell_args_parser/hub_shell_args_parser.h"
 #include "../lib/utils/utils.h"
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <unistd.h>
-
-#define DELAY_START_MONITOR 500000
-#define TIME_BUFFER_SIZE 32
 
 char log_msg[BUFSIZ];
+int monitor_pipe_fd = -1;
+const char *manager_path = "bin/treasure_manager";
+//=============================================================================
+// Forward Declarations
+//=============================================================================
+void setup_signal_handlers(void);
+void sigchld_handler(int sig);
+void refresh_prompt(void);
+int is_monitor_alive(void);
+void cmd_start_monitor(void);
+void cmd_stop_monitor(void);
+int check_monitor_stopping(void);
+operation_error dispatch_command(shell_command cmd, char args[][BUFSIZ],
+                                 int argc);
+int run_repl(void);
+void send_to_monitor(const char *cmd_line);
+operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc);
+operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc);
+operation_error cmd_view_treasure(char argv[][BUFSIZ], int argc);
 
-void refresh_prompt() {
-  char time_buf[TIME_BUFFER_SIZE];
-  time_t now = time(NULL);
-  struct tm *tm_info = localtime(&now);
-
-  strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", tm_info);
-
-  const char *status = mon_state == MON_RUNNING ? "running" : "stopped";
-
-  snprintf(log_msg, BUFSIZ, "\n%s treasure_hub [monitor: %s] $ ", time_buf,
-           status);
-  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+//=============================================================================
+// Signal Handling
+//=============================================================================
+void setup_signal_handlers(void) {
+  struct sigaction sa = {.sa_handler = sigchld_handler,
+                         .sa_flags = SA_RESTART | SA_NOCLDSTOP};
+  sigaction(SIGCHLD, &sa, NULL);
 }
-
-int is_monitor_alive() { return monitor_pid > 0 && kill(monitor_pid, 0) == 0; }
 
 void sigchld_handler(int sig) {
   int saved_errno = errno;
   int status;
-  pid_t r;
+  pid_t pid;
 
-  // reap all dead children
-  while ((r = waitpid(-1, &status, WNOHANG)) > 0) {
-    if (r == monitor_pid) {
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (pid == shell.monitor_pid && shell.state == MON_STOPPING) {
       if (WIFEXITED(status)) {
-        snprintf(log_msg, BUFSIZ, "\n[✓] Monitor exited (status=%d)\n",
+        snprintf(log_msg, BUFSIZ, "[✓] Monitor exited (status=%d)\n",
                  WEXITSTATUS(status));
       } else if (WIFSIGNALED(status)) {
-        snprintf(log_msg, BUFSIZ, "\n[!] Monitor died abnormally (signal=%d)\n",
+        snprintf(log_msg, BUFSIZ, "[!] Monitor died by signal %d\n",
                  WTERMSIG(status));
       }
       write(STDOUT_FILENO, log_msg, strlen(log_msg));
 
-      mon_state = MON_STOPPED;
-      monitor_pid = -1;
+      shell.state = MON_STOPPED;
+      shell.monitor_pid = -1;
       tcflush(STDIN_FILENO, TCIFLUSH);
+      refresh_prompt();
     }
   }
 
   errno = saved_errno;
 }
 
-void start_monitor() {
-  if (is_monitor_alive()) {
-    snprintf(log_msg, BUFSIZ, "[!] Monitor already running (PID: %d)\n",
-             monitor_pid);
+//=============================================================================
+// Send a command line to the monitor via Pipe
+//=============================================================================
+void send_to_monitor(const char *cmd_line) {
+
+  // error message if monitor is not running
+  if (!is_monitor_alive()) {
+    snprintf(log_msg, BUFSIZ,
+             "[!] Monitor is not running. Please start it first.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return;
   }
 
-  monitor_pid = fork();
+  // append newline so read_line in monitor sees an end‑of‑line
+  snprintf(log_msg, BUFSIZ, "%s\n", cmd_line);
+  write(monitor_pipe_fd, log_msg, strlen(log_msg));
+}
 
-  if (monitor_pid < 0) {
-    perror("Failed to fork monitor");
+//=============================================================================
+// Command implementations
+//=============================================================================
+void send_argv(char argv[][BUFSIZ], int argc) {
+  char buf[BUFSIZ];
+  strcpy(buf, manager_path);
+
+  for (int i = 0; i < argc; i++) {
+    strncat(buf, " ", BUFSIZ);
+    strncat(buf, argv[i], BUFSIZ);
+  }
+
+  send_to_monitor(buf);
+}
+
+// list_hunts: no args
+operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc) {
+  if (argc != LIST_HUNTS_ARGC)
+    return OPERATION_FAILED;
+
+  strcpy(argv[0], "--list");
+
+  send_argv(argv, argc);
+  return NO_ERROR;
+}
+
+// list_treasures: <hunt_id>
+operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc) {
+  if (argc != LIST_TREASURES_ARGC)
+    return OPERATION_FAILED;
+
+  strcpy(argv[0], "--list");
+
+  send_argv(argv, 2);
+  return NO_ERROR;
+}
+
+// view_treasure: <hunt_id> <treasure_id>
+operation_error cmd_view_treasure(char argv[][BUFSIZ], int argc) {
+  if (argc != VIEW_TREASURE_ARGC)
+    return OPERATION_FAILED;
+
+  strcpy(argv[0], "--list");
+
+  send_argv(argv, argc);
+  return NO_ERROR;
+}
+
+//=============================================================================
+// Prompt & Input Helpers
+//=============================================================================
+void refresh_prompt(void) {
+  char time_buf[TIME_BUFFER_SIZE];
+  time_t now = time(NULL);
+  struct tm *tm_info = localtime(&now);
+
+  strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", tm_info);
+  const char *status = (shell.state == MON_RUNNING) ? "running" : "stopped";
+
+  snprintf(log_msg, BUFSIZ, "\n%s treasure_hub [monitor: %s] $ ", time_buf,
+           status);
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+}
+
+int is_monitor_alive(void) {
+  return (shell.monitor_pid > 0) && (kill(shell.monitor_pid, 0) == 0);
+}
+
+//=============================================================================
+// Monitor Control
+//=============================================================================
+void cmd_start_monitor(void) {
+  // if the monitor is already running, return
+  if (is_monitor_alive()) {
+    snprintf(log_msg, BUFSIZ, "[!] Monitor already running (PID: %d)\n",
+             shell.monitor_pid);
+    write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return;
   }
 
-  if (monitor_pid == 0) {
-    // Child
+  // init the pipes
+  int pipefd[2];
+  if (pipe(pipefd) < 0) {
+    perror("pipe");
+    return;
+  }
+
+  shell.monitor_pid = fork();
+  if (shell.monitor_pid < 0) {
+    perror("Failed to fork monitor");
+    close(pipefd[0]);
+    close(pipefd[1]);
+    return;
+  }
+
+  if (shell.monitor_pid == 0) {
+    // child: close the write‑end, dup read‑end onto STDIN, then exec
+    close(pipefd[1]);
+    dup2(pipefd[0], STDIN_FILENO);
+    close(pipefd[0]);
     execl("./bin/monitor", "monitor", NULL);
-    perror("Failed to start monitor");
+    perror("execl");
     exit(EXIT_FAILURE);
   }
 
-  mon_state = MON_RUNNING;
+  // parent: close the read‑end, keep the write‑end for later
+  close(pipefd[0]);
+  monitor_pipe_fd = pipefd[1];
+  shell.state = MON_RUNNING;
 }
 
-void stop_monitor() {
+void cmd_stop_monitor(void) {
   if (!is_monitor_alive()) {
     snprintf(log_msg, BUFSIZ, "[!] No monitor process is currently running.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return;
   }
 
-  mon_state = MON_STOPPING;
+  shell.state = MON_STOPPING;
+  kill(shell.monitor_pid, SIGTERM);
 
-  kill(monitor_pid, SIGTERM);
+  // Inform the user we’ve sent SIGTERM; actual exit message
+  // comes asynchronously in handle_sigchld().
+  snprintf(log_msg, BUFSIZ, "[✓] Shutdown signal sent.\n");
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
 }
 
-void setup_signal_handlers() {
-  struct sigaction sa = {.sa_handler = sigchld_handler,
-                         .sa_flags = SA_RESTART | SA_NOCLDSTOP};
-  sigaction(SIGCHLD, &sa, NULL);
-}
-
-int check_monitor_stopping(const char *input_line) {
-  if (mon_state != MON_STOPPING)
+// While monitor is shutting down, intercept commands and report status
+int check_monitor_stopping(void) {
+  if (shell.state != MON_STOPPING)
     return 0;
 
-  int status;
-  pid_t r = waitpid(monitor_pid, &status, WNOHANG);
-
-  if (r == 0) {
-    // still shutting down
-    snprintf(log_msg, BUFSIZ,
-             "[!] Monitor is shutting down — please wait until it stops.\n");
-    write(STDOUT_FILENO, log_msg, strlen(log_msg));
-  } else if (r == monitor_pid) {
-    // monitor just exited
-    if (WIFEXITED(status)) {
-      snprintf(log_msg, BUFSIZ, "\n[✓] Monitor exited (status=%d)\n",
-               WEXITSTATUS(status));
-      write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    } else {
-      snprintf(log_msg, BUFSIZ, "\n[!] Monitor died abnormally (signal=%d)\n",
-               WTERMSIG(status));
-      write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    }
-
-    mon_state = MON_STOPPED;
-    monitor_pid = -1;
-    tcflush(STDIN_FILENO, TCIFLUSH);
-  }
-
-  return 1; // always swallow the user’s command while stopping
+  snprintf(log_msg, BUFSIZ, "[!] Monitor is shutting down, please wait.\n");
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+  return 1;
 }
 
-operation_error handle_command(shell_command cmd, char args[][BUFSIZ]) {
-  // help
+//=============================================================================
+// Exit command
+//=============================================================================
+void cmd_exit_shell() {
+  if (is_monitor_alive()) {
+    snprintf(log_msg, BUFSIZ,
+             "Cannot exit while monitor is running. Use stop_monitor first.\n");
+    write(STDOUT_FILENO, log_msg, strlen(log_msg));
+    return;
+  }
+
+  snprintf(log_msg, BUFSIZ, "Exiting treasure_hub shell\n");
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+
+  exit(0);
+}
+
+//=============================================================================
+// Command Dispatch
+//=============================================================================
+operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
+                                 int argc) {
+  // Intercept during shutdown
+  if (check_monitor_stopping())
+    return NO_ERROR;
+
+  // Go through command cases
   switch (cmd) {
   case CMD_HELP:
-    print_help_info();
+    cmd_print_help();
     break;
   case CMD_CLEAR:
-    clear_screen();
+    cmd_clear_screen();
     break;
   case CMD_START_MONITOR:
-    start_monitor();
+    cmd_start_monitor();
     break;
   case CMD_STOP_MONITOR:
-    stop_monitor();
+    cmd_stop_monitor();
     break;
   case CMD_EXIT:
-    exit_shell();
+    cmd_exit_shell();
+    break;
+  case CMD_LIST_HUNTS:
+    if (cmd_list_hunts(argv, argc) != NO_ERROR)
+      return OPERATION_FAILED;
+    break;
+  case CMD_LIST_TREASURES:
+    if (cmd_list_treasures(argv, argc) != NO_ERROR)
+      return OPERATION_FAILED;
+    break;
+  case CMD_VIEW_TREASURE:
+    if (cmd_view_treasure(argv, argc) != NO_ERROR)
+      return OPERATION_FAILED;
     break;
   default:
     write(STDOUT_FILENO, "Invalid command\n\n", 17);
-    print_help_info();
+    cmd_print_help();
     break;
   }
   return NO_ERROR;
 }
 
-int init_REPL_shell() {
+//=============================================================================
+// REPL (Read, Evaluate, Print, Loop)
+//=============================================================================
+int run_repl(void) {
   char input[BUFSIZ];
-  char args[MAX_ARGS][BUFSIZ];
-
+  char argv[MAX_ARGS][BUFSIZ];
+  int argc = 0;
   while (1) {
-    // first prompt
     refresh_prompt();
-
-    if (read_line(STDIN_FILENO, input, BUFSIZ) < 0)
+    ssize_t bytes_read = read(STDIN_FILENO, input, BUFSIZ);
+    if (bytes_read < 0)
       break;
 
-    if (check_monitor_stopping(input)) {
+    if (bytes_read == 0) {
       refresh_prompt();
       continue;
     }
 
-    shell_command cmd = parse_shell_cmd(input, args);
+    shell_command cmd = parse_shell_cmd(input, argv, &argc);
 
-    handle_command(cmd, args);
+    operation_error err = dispatch_command(cmd, argv, argc);
+
+    if (err != NO_ERROR) {
+      snprintf(log_msg, BUFSIZ, "Invalid command\n");
+      write(STDOUT_FILENO, log_msg, strlen(log_msg));
+    }
+
     if (cmd == CMD_START_MONITOR)
       usleep(DELAY_START_MONITOR);
   }
+
   return 0;
 }
 
+//=============================================================================
+// main()
+//=============================================================================
 int main(void) {
   setup_signal_handlers();
-  init_REPL_shell();
-  return 0;
+  return run_repl();
 }
