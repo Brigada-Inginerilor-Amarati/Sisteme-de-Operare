@@ -1,19 +1,18 @@
 #include "shell.h"
 #include "../lib/hub_shell_args_parser/hub_shell_args_parser.h"
 #include "../lib/utils/utils.h"
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <termios.h>
 #include <unistd.h>
 
 #define DELAY_START_MONITOR 500000
 #define TIME_BUFFER_SIZE 32
 
-pid_t monitor_pid = -1;
-int monitor_running = 0;
 char log_msg[BUFSIZ];
 
 void refresh_prompt() {
@@ -23,7 +22,7 @@ void refresh_prompt() {
 
   strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", tm_info);
 
-  const char *status = monitor_running ? "running" : "stopped";
+  const char *status = mon_state == MON_RUNNING ? "running" : "stopped";
 
   snprintf(log_msg, BUFSIZ, "\n%s treasure_hub [monitor: %s] $ ", time_buf,
            status);
@@ -31,6 +30,32 @@ void refresh_prompt() {
 }
 
 int is_monitor_alive() { return monitor_pid > 0 && kill(monitor_pid, 0) == 0; }
+
+void sigchld_handler(int sig) {
+  int saved_errno = errno;
+  int status;
+  pid_t r;
+
+  // reap all dead children
+  while ((r = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (r == monitor_pid) {
+      if (WIFEXITED(status)) {
+        snprintf(log_msg, BUFSIZ, "\n[✓] Monitor exited (status=%d)\n",
+                 WEXITSTATUS(status));
+      } else if (WIFSIGNALED(status)) {
+        snprintf(log_msg, BUFSIZ, "\n[!] Monitor died abnormally (signal=%d)\n",
+                 WTERMSIG(status));
+      }
+      write(STDOUT_FILENO, log_msg, strlen(log_msg));
+
+      mon_state = MON_STOPPED;
+      monitor_pid = -1;
+      tcflush(STDIN_FILENO, TCIFLUSH);
+    }
+  }
+
+  errno = saved_errno;
+}
 
 void start_monitor() {
   if (is_monitor_alive()) {
@@ -54,10 +79,7 @@ void start_monitor() {
     exit(EXIT_FAILURE);
   }
 
-  monitor_running = 1;
-  snprintf(log_msg, BUFSIZ, "[✓] Monitor started in background (PID: %d)\n",
-           monitor_pid);
-  write(STDOUT_FILENO, log_msg, strlen(log_msg));
+  mon_state = MON_RUNNING;
 }
 
 void stop_monitor() {
@@ -67,33 +89,47 @@ void stop_monitor() {
     return;
   }
 
-  // Send termination signal (e.g. SIGUSR2)
-  if (kill(monitor_pid, SIGTERM) == -1) {
-    perror("Failed to send termination signal to monitor");
-    return;
-  }
+  mon_state = MON_STOPPING;
 
-  // Wait for monitor to exit
+  kill(monitor_pid, SIGTERM);
+}
+
+void setup_signal_handlers() {
+  struct sigaction sa = {.sa_handler = sigchld_handler,
+                         .sa_flags = SA_RESTART | SA_NOCLDSTOP};
+  sigaction(SIGCHLD, &sa, NULL);
+}
+
+int check_monitor_stopping(const char *input_line) {
+  if (mon_state != MON_STOPPING)
+    return 0;
+
   int status;
-  if (waitpid(monitor_pid, &status, 0) == -1) {
-    perror("Failed to wait for monitor");
-  } else {
+  pid_t r = waitpid(monitor_pid, &status, WNOHANG);
+
+  if (r == 0) {
+    // still shutting down
+    snprintf(log_msg, BUFSIZ,
+             "[!] Monitor is shutting down — please wait until it stops.\n");
+    write(STDOUT_FILENO, log_msg, strlen(log_msg));
+  } else if (r == monitor_pid) {
+    // monitor just exited
     if (WIFEXITED(status)) {
-      snprintf(log_msg, BUFSIZ, "[✓] Monitor exited with status: %d\n",
+      snprintf(log_msg, BUFSIZ, "\n[✓] Monitor exited (status=%d)\n",
                WEXITSTATUS(status));
       write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    } else if (WIFSIGNALED(status)) {
-      snprintf(log_msg, BUFSIZ, "[!] Monitor was killed by signal: %d\n",
+    } else {
+      snprintf(log_msg, BUFSIZ, "\n[!] Monitor died abnormally (signal=%d)\n",
                WTERMSIG(status));
       write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    } else {
-      snprintf(log_msg, BUFSIZ, "[!] Monitor terminated abnormally.\n");
-      write(STDOUT_FILENO, log_msg, strlen(log_msg));
     }
+
+    mon_state = MON_STOPPED;
+    monitor_pid = -1;
+    tcflush(STDIN_FILENO, TCIFLUSH);
   }
 
-  monitor_running = 0;
-  monitor_pid = -1;
+  return 1; // always swallow the user’s command while stopping
 }
 
 operation_error handle_command(shell_command cmd, char args[][BUFSIZ]) {
@@ -127,27 +163,28 @@ int init_REPL_shell() {
   char args[MAX_ARGS][BUFSIZ];
 
   while (1) {
+    // first prompt
     refresh_prompt();
 
     if (read_line(STDIN_FILENO, input, BUFSIZ) < 0)
       break;
 
-    // Parse command and arguments
+    if (check_monitor_stopping(input)) {
+      refresh_prompt();
+      continue;
+    }
+
     shell_command cmd = parse_shell_cmd(input, args);
 
-    // Run command
     handle_command(cmd, args);
-
-    // Delay for the start_monitor command
-    if (cmd == CMD_START_MONITOR) {
+    if (cmd == CMD_START_MONITOR)
       usleep(DELAY_START_MONITOR);
-    }
   }
-
   return 0;
 }
 
 int main(void) {
+  setup_signal_handlers();
   init_REPL_shell();
   return 0;
 }

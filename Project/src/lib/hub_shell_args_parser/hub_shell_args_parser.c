@@ -4,11 +4,12 @@
 #include <string.h>
 #include <unistd.h>
 
-pid_t monitor_pid;
-int monitor_running;
+pid_t monitor_pid = -1;
+monitor_state mon_state = MON_STOPPED;
+char log_msg[BUFSIZ];
 
 void print_help_info() {
-  char *usage_msg = "\nUsage: bin/treasure_hub\n\n";
+  char *usage_msg = "Usage: bin/treasure_hub\n\n";
 
   char *start_msg = "start_monitor -> starts a separate background process "
                     "that monitors the hunts and prints to the standard output "
@@ -29,7 +30,7 @@ void print_help_info() {
                    "about a treasure in hunt\n\n";
 
   char *exit_msg = "exit: if the monitor still runs, prints an error message, "
-                   "otherwise ends the program\n\n";
+                   "otherwise ends the program\n";
 
   char help_msg[BUFSIZ];
 
@@ -85,52 +86,18 @@ shell_command parse_shell_cmd(char *string, char args[][BUFSIZ]) {
   return cmd;
 }
 
-void print_command(shell_command cmd) {
-  switch (cmd) {
-  case CMD_HELP:
-    write(STDOUT_FILENO, "help: prints the available commands\n",
-          strlen("help: prints the available commands\n"));
-    break;
-  case CMD_START_MONITOR:
-    write(STDOUT_FILENO, "start_monitor: starts the monitor\n",
-          strlen("start_monitor: starts the monitor\n"));
-    break;
-  case CMD_STOP_MONITOR:
-    write(STDOUT_FILENO, "stop_monitor: stops the monitor\n",
-          strlen("stop_monitor: stops the monitor\n"));
-    break;
-  case CMD_LIST_HUNTS:
-    write(STDOUT_FILENO, "list_hunts: lists the hunts\n",
-          strlen("list_hunts: lists the hunts\n"));
-    break;
-  case CMD_LIST_TREASURES:
-    write(STDOUT_FILENO, "list_treasures: lists the treasures\n",
-          strlen("list_treasures: lists the treasures\n"));
-    break;
-  case CMD_VIEW_TREASURE:
-    write(STDOUT_FILENO, "view_treasure: views a treasure\n",
-          strlen("view_treasure: views a treasure\n"));
-    break;
-  case CMD_EXIT:
-    write(STDOUT_FILENO, "exit: exits the program\n",
-          strlen("exit: exits the program\n"));
-    break;
-  default:
-    write(STDOUT_FILENO, "Invalid command\n", strlen("Invalid command\n"));
-    break;
-  }
-}
-
 void clear_screen() { write(STDOUT_FILENO, "\033[2J\033[H", 7); }
 
 void exit_shell() {
-  if (monitor_running) {
-    perror("Cannot exit while monitor is running. Use stop_monitor first.");
+  if (mon_state == MON_RUNNING) {
+    snprintf(log_msg, BUFSIZ,
+             "Cannot exit while monitor is running. Use stop_monitor first.\n");
+    write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return;
   }
 
-  write(STDOUT_FILENO, "Exiting treasure_hub shell\n",
-        strlen("Exiting treasure_hub shell\n"));
+  snprintf(log_msg, BUFSIZ, "Exiting treasure_hub shell\n");
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
 
   exit(0);
 }

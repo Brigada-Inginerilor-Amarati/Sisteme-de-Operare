@@ -15,8 +15,10 @@ typedef enum {
   CMD_VIEW_TREASURE
 } shell_command;
 
+typedef enum { MON_STOPPED = 0, MON_RUNNING, MON_STOPPING } monitor_state;
+
 #define MAX_ARGS 10
 extern pid_t monitor_pid;
-extern int monitor_running;
+extern monitor_state mon_state;
 
 #endif
