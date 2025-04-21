@@ -36,52 +36,51 @@ void cmd_print_help() {
   snprintf(help_msg, BUFSIZ, "%s%s%s%s%s%s%s", usage_msg, start_msg, stop_msg,
            list_msg1, list_msg2, view_msg, exit_msg);
 
-  write(1, help_msg, strlen(help_msg));
+  write(STDOUT_FILENO, help_msg, strlen(help_msg));
 }
 
-shell_command parse_shell_cmd(char *string, char args[][BUFSIZ], int *argc) {
+shell_command parse_shell_cmd(char *string, char args[MAX_ARGS][BUFSIZ],
+                              int *argc) {
+  // Clear everything up front
   *argc = 0;
-
-  // init the args array
-
   memset(args, 0, MAX_ARGS * BUFSIZ);
 
-  char *token = strtok(string, " \n");
-  if (!token)
+  // Make a local copy of the line so the original buffer is not modified
+  char buf[BUFSIZ];
+  size_t n = strnlen(string, BUFSIZ - 1);
+  memcpy(buf, string, n);
+  buf[n] = '\0';
+
+  // Tokenize on space or newline
+  char *tok = strtok(buf, " \n");
+  if (!tok) {
     return CMD_INVALID;
-
-  shell_command cmd = CMD_INVALID;
-
-  if (strcmp(token, "help") == 0)
-    cmd = CMD_HELP;
-  else if (strcmp(token, "clear") == 0)
-    cmd = CMD_CLEAR;
-  else if (strcmp(token, "start_monitor") == 0)
-    cmd = CMD_START_MONITOR;
-  else if (strcmp(token, "stop_monitor") == 0)
-    cmd = CMD_STOP_MONITOR;
-  else if (strcmp(token, "list_hunts") == 0)
-    cmd = CMD_LIST_HUNTS;
-  else if (strcmp(token, "list_treasures") == 0)
-    cmd = CMD_LIST_TREASURES;
-  else if (strcmp(token, "view_treasure") == 0)
-    cmd = CMD_VIEW_TREASURE;
-  else if (strcmp(token, "exit") == 0)
-    cmd = CMD_EXIT;
-  else
-    cmd = CMD_INVALID;
-
-  if (cmd == CMD_INVALID)
-    return CMD_INVALID;
-
-  strcpy(args[(*argc)++], token);
-
-  // Collect additional arguments
-  while ((token = strtok(NULL, " \n")) != NULL && *argc < 3) {
-    strcpy(args[(*argc)++], token);
   }
 
-  return cmd;
+  // Insert the tokens into the args array
+  do {
+    strncpy(args[(*argc)++], tok, BUFSIZ - 1);
+  } while (*argc < MAX_ARGS && (tok = strtok(NULL, " \n")) != NULL);
+
+  // Map args[0] to an enum
+  if (strcmp(args[0], "help") == 0)
+    return CMD_HELP;
+  else if (strcmp(args[0], "clear") == 0)
+    return CMD_CLEAR;
+  else if (strcmp(args[0], "start_monitor") == 0)
+    return CMD_START_MONITOR;
+  else if (strcmp(args[0], "stop_monitor") == 0)
+    return CMD_STOP_MONITOR;
+  else if (strcmp(args[0], "list_hunts") == 0)
+    return CMD_LIST_HUNTS;
+  else if (strcmp(args[0], "list_treasures") == 0)
+    return CMD_LIST_TREASURES;
+  else if (strcmp(args[0], "view_treasure") == 0)
+    return CMD_VIEW_TREASURE;
+  else if (strcmp(args[0], "exit") == 0)
+    return CMD_EXIT;
+  else
+    return CMD_INVALID;
 }
 
 void cmd_clear_screen() { write(STDOUT_FILENO, "\033[2J\033[H", 7); }

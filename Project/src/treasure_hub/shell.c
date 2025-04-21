@@ -1,10 +1,10 @@
 #include "shell.h"
 #include "../lib/hub_shell_args_parser/hub_shell_args_parser.h"
-#include "../lib/utils/utils.h"
 
 char log_msg[BUFSIZ];
 int monitor_pipe_fd = -1;
 const char *manager_path = "bin/treasure_manager";
+const char *list_cmd = "--list";
 //=============================================================================
 // Forward Declarations
 //=============================================================================
@@ -22,14 +22,24 @@ void send_to_monitor(const char *cmd_line);
 operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc);
 operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc);
 operation_error cmd_view_treasure(char argv[][BUFSIZ], int argc);
+void sig_refresh_handler(int sig);
 
 //=============================================================================
 // Signal Handling
 //=============================================================================
 void setup_signal_handlers(void) {
-  struct sigaction sa = {.sa_handler = sigchld_handler,
-                         .sa_flags = SA_RESTART | SA_NOCLDSTOP};
-  sigaction(SIGCHLD, &sa, NULL);
+  struct sigaction sa_child = {.sa_handler = sigchld_handler,
+                               .sa_flags = SA_RESTART | SA_NOCLDSTOP};
+  sigaction(SIGCHLD, &sa_child, NULL);
+
+  struct sigaction sa_refresh = {.sa_handler = sig_refresh_handler,
+                                 .sa_flags = 0};
+  sigaction(SIGUSR1, &sa_refresh, NULL);
+}
+
+void sig_refresh_handler(int sig) {
+  usleep(100000);
+  write(STDOUT_FILENO, "\r", 1);
 }
 
 void sigchld_handler(int sig) {
@@ -79,26 +89,16 @@ void send_to_monitor(const char *cmd_line) {
 //=============================================================================
 // Command implementations
 //=============================================================================
-void send_argv(char argv[][BUFSIZ], int argc) {
-  char buf[BUFSIZ];
-  strcpy(buf, manager_path);
-
-  for (int i = 0; i < argc; i++) {
-    strncat(buf, " ", BUFSIZ);
-    strncat(buf, argv[i], BUFSIZ);
-  }
-
-  send_to_monitor(buf);
-}
 
 // list_hunts: no args
 operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc) {
+
   if (argc != LIST_HUNTS_ARGC)
     return OPERATION_FAILED;
-
-  strcpy(argv[0], "--list");
-
-  send_argv(argv, argc);
+  char buf[BUFSIZ];
+  strcpy(argv[0], list_cmd);
+  snprintf(buf, sizeof(buf), "%s %s", manager_path, argv[0]);
+  send_to_monitor(buf);
   return NO_ERROR;
 }
 
@@ -106,10 +106,10 @@ operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc) {
 operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc) {
   if (argc != LIST_TREASURES_ARGC)
     return OPERATION_FAILED;
-
-  strcpy(argv[0], "--list");
-
-  send_argv(argv, 2);
+  char buf[BUFSIZ];
+  strcpy(argv[0], list_cmd);
+  snprintf(buf, sizeof(buf), "%s %s %s", manager_path, argv[0], argv[1]);
+  send_to_monitor(buf);
   return NO_ERROR;
 }
 
@@ -117,10 +117,11 @@ operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc) {
 operation_error cmd_view_treasure(char argv[][BUFSIZ], int argc) {
   if (argc != VIEW_TREASURE_ARGC)
     return OPERATION_FAILED;
-
-  strcpy(argv[0], "--list");
-
-  send_argv(argv, argc);
+  char buf[BUFSIZ];
+  strcpy(argv[0], list_cmd);
+  snprintf(buf, sizeof(buf), "%s %s %s %s", manager_path, argv[0], argv[1],
+           argv[2]);
+  send_to_monitor(buf);
   return NO_ERROR;
 }
 
@@ -269,9 +270,8 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
       return OPERATION_FAILED;
     break;
   default:
-    write(STDOUT_FILENO, "Invalid command\n\n", 17);
     cmd_print_help();
-    break;
+    return OPERATION_FAILED;
   }
   return NO_ERROR;
 }
@@ -279,19 +279,19 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
 //=============================================================================
 // REPL (Read, Evaluate, Print, Loop)
 //=============================================================================
+
 int run_repl(void) {
   char input[BUFSIZ];
   char argv[MAX_ARGS][BUFSIZ];
   int argc = 0;
   while (1) {
     refresh_prompt();
-    ssize_t bytes_read = read(STDIN_FILENO, input, BUFSIZ);
-    if (bytes_read < 0)
-      break;
-
-    if (bytes_read == 0) {
-      refresh_prompt();
-      continue;
+    ssize_t bytes_read = read_line(STDIN_FILENO, input, BUFSIZ);
+    if (bytes_read < 0) {
+      if (errno == EINTR)
+        continue;
+      else
+        break;
     }
 
     shell_command cmd = parse_shell_cmd(input, argv, &argc);

@@ -1,4 +1,4 @@
-#include "../lib/utils/utils.h" // for read_line
+#include "../lib/utils/utils.h"
 #include "shell.h"
 
 //=============================================================================
@@ -78,6 +78,9 @@ void execute_manager(const char *cmd) {
   }
   // Parent waits for the child
   waitpid(pid, NULL, 0);
+
+  // refresh the terminal
+  kill(getppid(), SIGUSR1);
 }
 
 //=============================================================================
@@ -92,9 +95,13 @@ void monitor_loop(void) {
     }
     // Strip newline
     line_buf[strcspn(line_buf, "\r\n")] = '\0';
-    dprintf(STDERR_FILENO, "[DEBUG] got: '%s' (%zd bytes)\n", line_buf, n);
+
+    write(STDOUT_FILENO, "\r\033[K", 4);
+
     // Execute via the manager
     execute_manager(line_buf);
+
+    write(STDOUT_FILENO, "\n", 1);
   }
 }
 

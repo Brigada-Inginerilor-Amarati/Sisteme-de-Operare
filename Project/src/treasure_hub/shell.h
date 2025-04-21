@@ -1,5 +1,6 @@
 #ifndef __SHELL_COMMANDS_H
 #define __SHELL_COMMANDS_H
+#include "../lib/utils/utils.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -13,7 +14,6 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
-
 //=============================================================================
 // Defines & Constants
 //=============================================================================
