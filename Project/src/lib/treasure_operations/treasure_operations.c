@@ -1,4 +1,4 @@
-#include "treasure.h"
+#include "treasure_operations.h"
 #include "../utils/utils.h"
 
 int is_valid_latitude(double latitude) {

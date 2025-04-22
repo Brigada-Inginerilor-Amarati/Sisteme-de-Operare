@@ -1,6 +1,6 @@
 #include "list.h"
 #include "../../log/log.h"
-#include "../../treasure/treasure.h"
+#include "../../treasure_operations/treasure_operations.h"
 #include "../../utils/utils.h"
 
 operation_error list_hunt(char *path) {

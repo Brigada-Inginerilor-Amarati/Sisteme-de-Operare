@@ -134,7 +134,19 @@ void refresh_prompt(void) {
   struct tm *tm_info = localtime(&now);
 
   strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", tm_info);
-  const char *status = (shell.state == MON_RUNNING) ? "running" : "stopped";
+  const char *status = NULL;
+
+  switch (shell.state) {
+  case MON_RUNNING:
+    status = "running";
+    break;
+  case MON_STOPPED:
+    status = "stopped";
+    break;
+  case MON_STOPPING:
+    status = "stopping";
+    break;
+  }
 
   snprintf(log_msg, BUFSIZ, "\n%s treasure_hub [monitor: %s] $ ", time_buf,
            status);

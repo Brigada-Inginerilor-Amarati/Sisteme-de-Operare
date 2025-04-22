@@ -27,7 +27,11 @@ void monitor_loop(void);
 //=============================================================================
 void handle_sigterm(int signum) {
   // Shutdown signal received
-  dprintf(STDOUT_FILENO, "\n[MONITOR] Received shutdown signal (%d)\n", signum);
+
+  // go to the previous line
+  write(STDOUT_FILENO, "\r\033[K", 4);
+
+  dprintf(STDOUT_FILENO, "[MONITOR] Received shutdown signal (%d)\n", signum);
   running = 0;
 }
 
@@ -62,12 +66,14 @@ void execute_manager(const char *cmd) {
   // Fork and exec "sh -c <cmd>"
   pid_t pid = fork();
   if (pid < 0) {
+    write(STDOUT_FILENO, "\r\033[K", 4);
     dprintf(STDERR_FILENO, "[MONITOR] fork failed: %s\n", strerror(errno));
     return;
   }
   if (pid == 0) {
     // In child, execute the manager
     execlp("sh", "sh", "-c", cmd, (char *)NULL);
+    write(STDOUT_FILENO, "\r\033[K", 4);
     dprintf(STDERR_FILENO, "[MONITOR] exec failed: %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
@@ -83,19 +89,19 @@ void execute_manager(const char *cmd) {
 void monitor_loop(void) {
   while (running) {
     ssize_t n = read_line(STDIN_FILENO, line_buf, LINE_BUF_SIZE);
-    if (n <= 0) {
-      // perror("monitor: read_line");
+    if (n <= 0)
       break;
-    }
-    // Strip newline
-    line_buf[strcspn(line_buf, "\r\n")] = '\0';
 
+    // Strip newline
+    // line_buf[strcspn(line_buf, "\r\n")] = '\0';
+
+    // Reset the prompt
     write(STDOUT_FILENO, "\r\033[K", 4);
 
     // Execute via the manager
     execute_manager(line_buf);
 
-    write(STDOUT_FILENO, "\n", 1);
+    // write(STDOUT_FILENO, "\n", 1);
   }
 }
 
@@ -107,13 +113,15 @@ int main(void) {
   setup_signal_handlers();
 
   // Announce startup
-  dprintf(STDOUT_FILENO, "\n[MONITOR] Monitor started (PID: %d)\n", getpid());
+  dprintf(STDOUT_FILENO, "[MONITOR] Monitor started (PID: %d)\n", getpid());
 
   // Enter main loop
   monitor_loop();
 
-  sleep(10);
+  // Simulate prolonged shutdown
+  sleep(5);
 
-  dprintf(STDOUT_FILENO, "\n[MONITOR] Shutting down.\n");
+  // Announce shutdown
+  dprintf(STDOUT_FILENO, "[MONITOR] Shutting down.\n");
   return EXIT_SUCCESS;
 }

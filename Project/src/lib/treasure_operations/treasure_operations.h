@@ -1,5 +1,5 @@
-#ifndef __TREASURE_H
-#define __TREASURE_H
+#ifndef __TREASURE_OPERATIONS_H
+#define __TREASURE_OPERATIONS_H
 
 #include "../../treasure_manager/treasure_manager.h"
 
