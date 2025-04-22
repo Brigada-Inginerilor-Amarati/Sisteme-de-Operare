@@ -1,5 +1,5 @@
 #include "remove.h"
-#include "../../log/log.h"
+#include "../../logging_sys/log.h"
 
 operation_error remove_hunt(char *dir_name) {
   char path[PATH_MAX];

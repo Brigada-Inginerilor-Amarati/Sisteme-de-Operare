@@ -1,7 +1,7 @@
 #include "list.h"
-#include "../../log/log.h"
+#include "../../logging_sys/log.h"
+#include "../../manager_utils/manager_utils.h"
 #include "../../treasure_operations/treasure_operations.h"
-#include "../../utils/utils.h"
 
 operation_error list_hunt(char *path) {
 
@@ -117,7 +117,8 @@ operation_error list_treasure(char *path, int id) {
   }
 
   // end the search, no treasure found
-  perror("LIST ERROR, TREASURE NOT FOUND");
+  write(STDOUT_FILENO, "LIST ERROR, TREASURE NOT FOUND\n",
+        strlen("LIST ERROR, TREASURE NOT FOUND\n"));
   close(fd);
   get_search_failure_log_message(log_msg, id);
   log_message(log_file_path, log_msg);

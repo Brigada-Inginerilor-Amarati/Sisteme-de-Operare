@@ -1,6 +1,7 @@
 #include "treasure_manager.h"
-#include "../lib/manager_args_parser/manager_args_parser.h"
-#include "../lib/operations/operations.h"
+#include "../lib/treasure_manager/manager_args_parser/manager_args_parser.h"
+#include "../lib/treasure_manager/manager_cmd/operations.h"
+#include "../lib/treasure_manager/treasure_operations/treasure_operations.h"
 
 operation_error execute_operation(int argc, char *argv[]) {
   operation op = read_operation(argc, argv);
@@ -16,6 +17,7 @@ operation_error execute_operation(int argc, char *argv[]) {
     return NO_ERROR;
   case ADD:
     return add_treasure(hunt_id, STDIN_FILENO);
+    break;
   case LIST:
     if (hunt_id == NULL)
       return list_hunts();
@@ -34,4 +36,7 @@ operation_error execute_operation(int argc, char *argv[]) {
   }
 }
 
-int main(int argc, char *argv[]) { return execute_operation(argc, argv); }
+int main(int argc, char *argv[]) {
+  execute_operation(argc, argv);
+  return 0;
+}

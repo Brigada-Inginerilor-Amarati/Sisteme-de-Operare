@@ -1,6 +1,6 @@
 #include "shell.h"
-#include "../../lib/hub_shell_args_parser/hub_shell_args_parser.h"
-#include "../../lib/utils/utils.h"
+#include "../../lib/global_utils/global_utils.h"
+#include "../../lib/treasure_hub/shell_args_parser/shell_args_parser.h"
 
 char log_msg[BUFSIZ];
 int monitor_pipe_fd = -1;
@@ -100,7 +100,7 @@ operation_error cmd_list_hunts(char argv[][BUFSIZ], int argc) {
   strcpy(argv[0], list_cmd);
   snprintf(buf, sizeof(buf), "%s %s", manager_path, argv[0]);
   send_to_monitor(buf);
-  return NO_ERROR;
+  return OPERATION_SUCCESS;
 }
 
 // list_treasures: <hunt_id>
@@ -111,7 +111,7 @@ operation_error cmd_list_treasures(char argv[][BUFSIZ], int argc) {
   strcpy(argv[0], list_cmd);
   snprintf(buf, sizeof(buf), "%s %s %s", manager_path, argv[0], argv[1]);
   send_to_monitor(buf);
-  return NO_ERROR;
+  return OPERATION_SUCCESS;
 }
 
 // view_treasure: <hunt_id> <treasure_id>
@@ -123,7 +123,7 @@ operation_error cmd_view_treasure(char argv[][BUFSIZ], int argc) {
   snprintf(buf, sizeof(buf), "%s %s %s %s", manager_path, argv[0], argv[1],
            argv[2]);
   send_to_monitor(buf);
-  return NO_ERROR;
+  return OPERATION_SUCCESS;
 }
 
 //=============================================================================
@@ -251,7 +251,7 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
                                  int argc) {
   // Intercept during shutdown
   if (check_monitor_stopping())
-    return NO_ERROR;
+    return OPERATION_SUCCESS;
 
   // Go through command cases
   switch (cmd) {
@@ -271,22 +271,22 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
     cmd_exit_shell();
     break;
   case CMD_LIST_HUNTS:
-    if (cmd_list_hunts(argv, argc) != NO_ERROR)
+    if (cmd_list_hunts(argv, argc) != OPERATION_SUCCESS)
       return OPERATION_FAILED;
     break;
   case CMD_LIST_TREASURES:
-    if (cmd_list_treasures(argv, argc) != NO_ERROR)
+    if (cmd_list_treasures(argv, argc) != OPERATION_SUCCESS)
       return OPERATION_FAILED;
     break;
   case CMD_VIEW_TREASURE:
-    if (cmd_view_treasure(argv, argc) != NO_ERROR)
+    if (cmd_view_treasure(argv, argc) != OPERATION_SUCCESS)
       return OPERATION_FAILED;
     break;
   default:
     cmd_print_help();
     return OPERATION_FAILED;
   }
-  return NO_ERROR;
+  return OPERATION_SUCCESS;
 }
 
 //=============================================================================
@@ -311,7 +311,7 @@ int run_repl(void) {
 
     operation_error err = dispatch_command(cmd, argv, argc);
 
-    if (err != NO_ERROR) {
+    if (err != OPERATION_SUCCESS) {
       snprintf(log_msg, BUFSIZ, "Invalid command\n");
       write(STDOUT_FILENO, log_msg, strlen(log_msg));
     }

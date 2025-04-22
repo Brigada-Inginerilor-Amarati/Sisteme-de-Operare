@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "manager_utils.h"
 
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
 
@@ -55,31 +55,6 @@ time_t get_treasure_file_last_modified(const char *path) {
     return 0;
 
   return st.st_mtime;
-}
-
-ssize_t read_line(int fd, char *buf, size_t max_len) {
-  size_t i = 0;
-  char ch;
-  ssize_t n;
-
-  while (i < max_len - 1) {
-    n = read(fd, &ch, 1);
-
-    if (n == 0) {
-      break; // EOF
-    } else if (n < 0) {
-      return -1; // read error
-    }
-
-    buf[i++] = ch;
-
-    if (ch == '\n') {
-      break;
-    }
-  }
-
-  buf[i] = '\0';
-  return i;
 }
 
 operation_error id_exists(char *file_path, int id) {

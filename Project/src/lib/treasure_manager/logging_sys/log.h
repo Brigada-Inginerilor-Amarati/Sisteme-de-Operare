@@ -1,7 +1,7 @@
 #ifndef __LOG_H
 #define __LOG_H
 
-#include "../../treasure_manager/treasure_manager.h"
+#include "../../../treasure_manager/treasure_manager.h"
 
 int symlink_file(const char *dir_name);
 operation_error log_message(const char *log_file_path, const char *message);

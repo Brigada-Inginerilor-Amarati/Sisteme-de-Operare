@@ -44,6 +44,8 @@ typedef enum {
   CMD_VIEW_TREASURE
 } shell_command;
 
+typedef enum { OPERATION_FAILED, OPERATION_SUCCESS } operation_error;
+
 typedef struct {
   pid_t monitor_pid;
   enum { MON_STOPPED, MON_RUNNING, MON_STOPPING } state;
