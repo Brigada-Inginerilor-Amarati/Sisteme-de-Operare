@@ -1,5 +1,6 @@
 #include "shell.h"
-#include "../lib/hub_shell_args_parser/hub_shell_args_parser.h"
+#include "../../lib/hub_shell_args_parser/hub_shell_args_parser.h"
+#include "../../lib/utils/utils.h"
 
 char log_msg[BUFSIZ];
 int monitor_pipe_fd = -1;
