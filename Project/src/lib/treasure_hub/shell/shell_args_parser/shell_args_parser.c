@@ -1,5 +1,9 @@
 #include "shell_args_parser.h"
 
+//=============================================================================
+// Command-line Arguments Parsing
+//=============================================================================
+
 shell_command parse_shell_cmd(char *string, char args[MAX_ARGS][BUFSIZ],
                               int *argc) {
   // Clear everything up front
@@ -43,5 +47,3 @@ shell_command parse_shell_cmd(char *string, char args[MAX_ARGS][BUFSIZ],
   else
     return CMD_INVALID;
 }
-
-void cmd_clear_screen() { write(STDOUT_FILENO, "\033[2J\033[H", 7); }
