@@ -1,7 +1,11 @@
 #include "shell.h"
 #include "../../lib/global_utils/global_utils.h"
+#include "../../lib/treasure_hub/monitor_control/monitor_control.h"
 #include "../../lib/treasure_hub/shell_args_parser/shell_args_parser.h"
+#include "../../lib/treasure_hub/shell_cmd/shell_cmd.h"
+#include "../../lib/treasure_hub/shell_utils/shell_utils.h"
 
+shell_t shell = {.monitor_pid = -1, .state = MON_STOPPED};
 char log_msg[BUFSIZ];
 int monitor_pipe_fd = -1;
 const char *manager_path = "bin/treasure_manager";
