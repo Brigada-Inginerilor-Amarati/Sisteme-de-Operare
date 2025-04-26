@@ -15,6 +15,8 @@ operation_error cmd_start_monitor(void) {
     return OPERATION_FAILED;
   }
 
+  // main process    write >--pipe--> read    child process
+
   // init the pipes
   int pipefd[2];
   if (pipe(pipefd) < 0) {

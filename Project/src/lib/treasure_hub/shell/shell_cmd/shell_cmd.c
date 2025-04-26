@@ -19,6 +19,8 @@ operation_error send_to_monitor(const char *cmd_line) {
 
   // append newline so read_line in monitor sees an end‑of‑line
   snprintf(log_msg, BUFSIZ, "%s\n", cmd_line);
+
+  // send data to monitor via pipe
   write(shell.monitor_pipe_fd, log_msg, strlen(log_msg));
 
   return OPERATION_SUCCESS;

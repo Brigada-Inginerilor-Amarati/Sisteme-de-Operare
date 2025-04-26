@@ -9,7 +9,10 @@ void handle_sigterm(int signum) {
   // go to the previous line
   write(STDOUT_FILENO, "\r\033[K", 4);
 
-  dprintf(STDOUT_FILENO, "[MONITOR] Received shutdown signal (%d)\n", signum);
+  char msg[] = "[MONITOR] Received shutdown signal (%d)\n";
+  snprintf(msg, sizeof(msg), msg, signum);
+  write(STDOUT_FILENO, msg, strlen(msg));
+
   running = 0;
 }
 

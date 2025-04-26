@@ -33,11 +33,15 @@ void monitor_loop(void) {
 // main()
 //=============================================================================
 int main(void) {
+
+  char msg[BUFSIZ];
+
   // Install signal handlers
   setup_signal_handlers();
 
   // Announce startup
-  dprintf(STDOUT_FILENO, "[MONITOR] Monitor started (PID: %d)\n", getpid());
+  snprintf(msg, BUFSIZ, "[MONITOR] Monitor started (PID: %d)\n", getpid());
+  write(STDOUT_FILENO, msg, strlen(msg));
 
   // Enter main loop
   monitor_loop();
@@ -46,6 +50,7 @@ int main(void) {
   sleep(5);
 
   // Announce shutdown
-  dprintf(STDOUT_FILENO, "[MONITOR] Shutting down.\n");
+  snprintf(msg, BUFSIZ, "[MONITOR] Shutting down.\n");
+  write(STDOUT_FILENO, msg, strlen(msg));
   return EXIT_SUCCESS;
 }
