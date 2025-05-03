@@ -2,7 +2,7 @@
 #include "../shell_utils/shell_utils.h"
 
 //=============================================================================
-// Signal Handling
+// Signal Handling -> SIGUSR1 from Monitor and Zombie Prevention
 //=============================================================================
 
 void sig_refresh_handler(int sig) {
@@ -17,7 +17,7 @@ void sigchld_handler(int sig) {
   pid_t pid;
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-    if (pid == shell.monitor_pid && shell.state == MON_STOPPING) {
+    if (pid == shell.monitor_pid && shell.state == MON_SHUTTING_DOWN) {
       if (WIFEXITED(status)) {
         snprintf(log_msg, BUFSIZ, "[✓] Monitor exited (status=%d)\n",
                  WEXITSTATUS(status));
@@ -27,7 +27,7 @@ void sigchld_handler(int sig) {
       }
       write(STDOUT_FILENO, log_msg, strlen(log_msg));
 
-      shell.state = MON_STOPPED;
+      shell.state = MON_OFFLINE;
       shell.monitor_pid = -1;
       tcflush(STDIN_FILENO, TCIFLUSH);
       refresh_prompt();

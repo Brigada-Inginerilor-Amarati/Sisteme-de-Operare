@@ -1,6 +1,10 @@
 #include "manager_args_parser.h"
 #include "../manager_cmd/help/help.h"
 
+//=============================================================================
+// Operation Management
+//=============================================================================
+
 operation read_operation(int argc, char **argv) {
   if (argc < 2)
     return OPERATION_INVALID;

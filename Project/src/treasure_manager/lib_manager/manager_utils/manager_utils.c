@@ -1,6 +1,8 @@
 #include "manager_utils.h"
 
-#define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
+//=============================================================================
+// File / Directory Management
+//=============================================================================
 
 operation_error add_file(const char *path) {
   // check if the file exists
@@ -28,7 +30,7 @@ operation_error directory_exists(const char *path) {
   return 1;
 }
 
-operation_error add_directory(char *path) {
+operation_error add_directory(const char *path) {
   const char *err_msg =
       "No hunt with this id was found.\nCreating new hunt directory.\n";
   write(STDERR_FILENO, err_msg, strlen(err_msg));
@@ -40,6 +42,10 @@ operation_error add_directory(char *path) {
 
   return NO_ERROR;
 }
+
+//=============================================================================
+// File / Directory Data
+//=============================================================================
 
 off_t get_treasure_file_size(const char *path) {
   struct stat st;
@@ -57,7 +63,7 @@ time_t get_treasure_file_last_modified(const char *path) {
   return st.st_mtime;
 }
 
-operation_error id_exists(char *file_path, int id) {
+operation_error id_exists(const char *file_path, int id) {
   int fd = open(file_path, O_RDONLY);
   if (fd == -1)
     return FILE_ERROR;
@@ -74,7 +80,7 @@ operation_error id_exists(char *file_path, int id) {
   return NO_ERROR;
 }
 
-int get_treasure_count(char *path) {
+int get_treasure_count(const char *path) {
   char treasure_file_path[PATH_MAX];
   snprintf(treasure_file_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
            TREASURE_FILE_NAME);

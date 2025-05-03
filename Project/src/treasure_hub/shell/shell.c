@@ -8,7 +8,7 @@
 // init shell state
 shell_t shell = {
     .monitor_pid = -1,
-    .state = MON_STOPPED,
+    .state = MON_OFFLINE,
     .monitor_pipe_fd = -1,
 };
 

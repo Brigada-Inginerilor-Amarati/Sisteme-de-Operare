@@ -3,6 +3,10 @@
 
 time_t now;
 
+//=============================================================================
+// Symlink log files
+//=============================================================================
+
 int symlink_file(const char *dir_name) {
   char target_path[PATH_MAX] = "";
   snprintf(target_path, sizeof(target_path), "../%s/%s/%s", TREASURE_DIRECTORY,
@@ -23,6 +27,10 @@ int symlink_file(const char *dir_name) {
 
   return NO_ERROR;
 }
+
+//=============================================================================
+// Logging System
+//=============================================================================
 
 operation_error log_message(const char *path, const char *message) {
   int fd = open(path, O_WRONLY | O_APPEND | O_CREAT, 0644);
@@ -49,6 +57,10 @@ operation_error log_message(const char *path, const char *message) {
   close(fd);
   return NO_ERROR;
 }
+
+//=============================================================================
+// Log Messages
+//=============================================================================
 
 void get_add_failure_log_message(char *msg, treasure *t) {
   snprintf(msg, LOG_MESSAGE_MAX,

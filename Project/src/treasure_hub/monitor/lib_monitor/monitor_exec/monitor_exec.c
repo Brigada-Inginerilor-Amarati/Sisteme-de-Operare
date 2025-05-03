@@ -3,6 +3,7 @@
 //=============================================================================
 // Execute the manager binary with the given command string
 //=============================================================================
+
 void execute_manager(const char *cmd) {
 
   char msg[BUFSIZ];

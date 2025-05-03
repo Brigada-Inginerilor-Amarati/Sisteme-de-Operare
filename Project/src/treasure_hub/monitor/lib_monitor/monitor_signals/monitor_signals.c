@@ -1,8 +1,9 @@
 #include "monitor_signals.h"
 
 //=============================================================================
-// Signal Handlers
+// Signal Handling -> Monitor Shutdown and Zombie Prevention
 //=============================================================================
+
 void handle_sigterm(int signum) {
   // Shutdown signal received
 

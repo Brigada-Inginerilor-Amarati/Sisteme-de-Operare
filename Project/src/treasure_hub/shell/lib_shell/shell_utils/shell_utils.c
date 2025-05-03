@@ -15,14 +15,14 @@ void refresh_prompt(void) {
   const char *status = NULL;
 
   switch (shell.state) {
-  case MON_RUNNING:
-    status = "running";
+  case MON_ONLINE:
+    status = "online";
     break;
-  case MON_STOPPED:
-    status = "stopped";
+  case MON_OFFLINE:
+    status = "offline";
     break;
-  case MON_STOPPING:
-    status = "stopping";
+  case MON_SHUTTING_DOWN:
+    status = "shutting down";
     break;
   }
 

@@ -1,6 +1,10 @@
 #include "treasure_operations.h"
 #include "../../../lib/utils/utils.h"
 
+//=============================================================================
+// Data validation
+//=============================================================================
+
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;
 }
@@ -8,6 +12,10 @@ int is_valid_latitude(double latitude) {
 int is_valid_longitude(double longitude) {
   return longitude >= -180.0 && longitude <= 180.0;
 }
+
+//=============================================================================
+// Parsing
+//=============================================================================
 
 operation_error create_treasure(treasure *t, int fd) {
   treasure void_t = {0, "\0", 0, 0.0, 0.0, "\0"};
@@ -117,6 +125,10 @@ operation_error create_treasure(treasure *t, int fd) {
 
   return NO_ERROR;
 }
+
+//=============================================================================
+// Output to file / stdout / buffer
+//=============================================================================
 
 operation_error write_treasure_to_file(const treasure *t, const char *path) {
   int fd = open(path, O_WRONLY | O_APPEND);

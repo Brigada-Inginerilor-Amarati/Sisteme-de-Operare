@@ -46,7 +46,7 @@ operation_error cmd_start_monitor(void) {
   // parent: close the read‑end, keep the write‑end for later
   close(pipefd[0]);
   shell.monitor_pipe_fd = pipefd[1];
-  shell.state = MON_RUNNING;
+  shell.state = MON_ONLINE;
 
   return OPERATION_SUCCESS;
 }
@@ -62,7 +62,7 @@ operation_error cmd_stop_monitor(void) {
     return OPERATION_FAILED;
   }
 
-  shell.state = MON_STOPPING;
+  shell.state = MON_SHUTTING_DOWN;
   kill(shell.monitor_pid, SIGTERM);
 
   // close the pipes
@@ -85,7 +85,7 @@ int is_monitor_alive(void) {
 
 // While monitor is shutting down, intercept commands and report status
 int check_monitor_stopping(void) {
-  if (shell.state != MON_STOPPING)
+  if (shell.state != MON_SHUTTING_DOWN)
     return 0;
 
   snprintf(log_msg, BUFSIZ, "[!] Monitor is shutting down, please wait.\n");

@@ -3,7 +3,7 @@
 #include "../../manager_utils/manager_utils.h"
 #include "../../treasure_operations/treasure_operations.h"
 
-operation_error list_hunt(char *path) {
+operation_error list_hunt(const char *path) {
 
   // prepare the path variables
   char log_msg[LOG_MESSAGE_MAX];
@@ -74,7 +74,7 @@ operation_error list_hunt(char *path) {
   return NO_ERROR;
 }
 
-operation_error list_treasure(char *path, int id) {
+operation_error list_treasure(const char *path, int id) {
 
   // prepare the path variables
   char log_msg[LOG_MESSAGE_MAX];

@@ -53,7 +53,7 @@ typedef enum { OPERATION_FAILED, OPERATION_SUCCESS } operation_error;
 
 typedef struct {
   pid_t monitor_pid;
-  enum { MON_STOPPED, MON_RUNNING, MON_STOPPING } state;
+  enum { MON_OFFLINE, MON_ONLINE, MON_SHUTTING_DOWN } state;
   int monitor_pipe_fd;
 } shell_t;
 
