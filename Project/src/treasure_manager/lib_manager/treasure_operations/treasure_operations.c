@@ -1,5 +1,5 @@
 #include "treasure_operations.h"
-#include "../../../lib/global_utils/global_utils.h"
+#include "../../../lib/utils/utils.h"
 
 int is_valid_latitude(double latitude) {
   return latitude >= -90.0 && latitude <= 90.0;

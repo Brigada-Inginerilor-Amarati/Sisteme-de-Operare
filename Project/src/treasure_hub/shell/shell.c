@@ -1,5 +1,5 @@
 #include "shell.h"
-#include "../../lib/global_utils/global_utils.h"
+#include "../../lib/utils/utils.h"
 #include "lib_shell/shell_args_parser/shell_args_parser.h"
 #include "lib_shell/shell_cmd/shell_cmd.h"
 #include "lib_shell/shell_signals/shell_signals.h"

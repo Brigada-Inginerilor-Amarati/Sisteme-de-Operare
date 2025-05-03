@@ -14,10 +14,10 @@ SRC_SHELL = src/treasure_hub/shell/shell.c
 SRC_MONITOR = src/treasure_hub/monitor/monitor.c
 
 # libraries
-SRC_LIB_MANAGER = $(shell find src/lib/treasure_manager -name "*.c")
-SRC_LIB_HUB = $(shell find src/lib/treasure_hub/shell -name "*.c")
-SRC_LIB_MONITOR = $(shell find src/lib/treasure_hub/monitor -name "*.c")
-SRC_LIB_GLOBAL = $(shell find src/lib/global_utils -name "*.c")
+SRC_LIB_MANAGER = $(shell find src/treasure_manager/lib_manager -name "*.c")
+SRC_LIB_SHELL = $(shell find src/treasure_hub/shell/lib_shell -name "*.c")
+SRC_LIB_MONITOR = $(shell find src/treasure_hub/monitor/lib_monitor -name "*.c")
+SRC_LIB_GLOBAL = $(shell find src/lib -name "*.c")
 
 init:
 	@echo "Initializing project"
@@ -27,11 +27,11 @@ init:
 build:
 	@echo "Building project"
 	@echo "\nBuilding treasure_manager"
-	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MANAGER) $(SRC_LIB_MANAGER) $(SRC_MANAGER) $(SRC_LIB_GLOBAL)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MANAGER) $(SRC_LIB_GLOBAL) $(SRC_LIB_MANAGER) $(SRC_MANAGER)
 	@echo "\nBuilding treasure_hub shell"
-	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_SHELL) $(SRC_LIB_HUB) $(SRC_SHELL) $(SRC_LIB_GLOBAL)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_SHELL) $(SRC_LIB_GLOBAL) $(SRC_LIB_SHELL) $(SRC_SHELL)
 	@echo "\nBuilding treasure_hub monitor"
-	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MONITOR) $(SRC_LIB_MONITOR) $(SRC_MONITOR) $(SRC_LIB_GLOBAL)
+	$(CC) $(CFLAGS) -o $(BIN)/$(BIN_MONITOR) $(SRC_LIB_GLOBAL) $(SRC_LIB_MONITOR) $(SRC_MONITOR)
 	@echo "\nProject built successfully"
 
 clean:

@@ -1,5 +1,5 @@
 #include "monitor.h"
-#include "../../lib/global_utils/global_utils.h"
+#include "../../lib/utils/utils.h"
 #include "lib_monitor/monitor_exec/monitor_exec.h"
 #include "lib_monitor/monitor_signals/monitor_signals.h"
 

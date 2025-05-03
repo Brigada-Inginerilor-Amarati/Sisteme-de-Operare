@@ -1,4 +1,4 @@
-#include "global_utils.h"
+#include "utils.h"
 #include <unistd.h>
 
 ssize_t read_line(int fd, char *buf, size_t max_len) {
