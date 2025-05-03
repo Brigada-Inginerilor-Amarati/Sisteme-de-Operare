@@ -71,8 +71,9 @@ void cmd_print_help() {
 
 void cmd_exit_shell() {
   if (is_monitor_alive()) {
-    snprintf(log_msg, BUFSIZ,
-             "Cannot exit while monitor is running. Use stop_monitor first.\n");
+    snprintf(
+        log_msg, BUFSIZ,
+        "Cannot exit while monitor is running. Use 'stop_monitor' first.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return;
   }

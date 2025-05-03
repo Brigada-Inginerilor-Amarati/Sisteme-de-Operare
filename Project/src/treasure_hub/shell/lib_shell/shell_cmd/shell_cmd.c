@@ -12,7 +12,7 @@ operation_error send_to_monitor(const char *cmd_line) {
   // error message if monitor is not running
   if (!is_monitor_alive()) {
     snprintf(log_msg, BUFSIZ,
-             "[!] Monitor is not running. Please start it first.\n");
+             "[!] Monitor is not running. Use 'start_monitor' first.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
     return OPERATION_FAILED;
   }
