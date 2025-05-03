@@ -1,7 +1,7 @@
 #include "monitor.h"
 #include "../../lib/global_utils/global_utils.h"
-#include "../../lib/treasure_hub/monitor/monitor_exec/monitor_exec.h"
-#include "../../lib/treasure_hub/monitor/monitor_signals/monitor_signals.h"
+#include "lib_monitor/monitor_exec/monitor_exec.h"
+#include "lib_monitor/monitor_signals/monitor_signals.h"
 
 //=============================================================================
 // Global State

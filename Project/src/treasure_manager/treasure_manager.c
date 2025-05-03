@@ -1,7 +1,7 @@
 #include "treasure_manager.h"
-#include "../lib/treasure_manager/manager_args_parser/manager_args_parser.h"
-#include "../lib/treasure_manager/manager_cmd/operations.h"
-#include "../lib/treasure_manager/treasure_operations/treasure_operations.h"
+#include "lib_manager/manager_args_parser/manager_args_parser.h"
+#include "lib_manager/manager_cmd/operations.h"
+#include "lib_manager/treasure_operations/treasure_operations.h"
 
 operation_error execute_operation(int argc, char *argv[]) {
   operation op = read_operation(argc, argv);

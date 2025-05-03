@@ -1,9 +1,9 @@
 #include "shell.h"
 #include "../../lib/global_utils/global_utils.h"
-#include "../../lib/treasure_hub/shell/shell_args_parser/shell_args_parser.h"
-#include "../../lib/treasure_hub/shell/shell_cmd/shell_cmd.h"
-#include "../../lib/treasure_hub/shell/shell_signals/shell_signals.h"
-#include "../../lib/treasure_hub/shell/shell_utils/shell_utils.h"
+#include "lib_shell/shell_args_parser/shell_args_parser.h"
+#include "lib_shell/shell_cmd/shell_cmd.h"
+#include "lib_shell/shell_signals/shell_signals.h"
+#include "lib_shell/shell_utils/shell_utils.h"
 
 // init shell state
 shell_t shell = {
