@@ -14,8 +14,8 @@ void get_search_success_log_message(char *msg, int id);
 void get_search_failure_log_message(char *msg, int id);
 void get_search_killed_log_message(char *msg, int id);
 
-void get_list_failure_log_message(char *msg, char *path);
-void get_list_success_log_message(char *msg, char *path);
+void get_list_failure_log_message(char *msg, const char *path);
+void get_list_success_log_message(char *msg, const char *path);
 
 void get_remove_killed_log_message(char *msg, int id);
 void get_remove_failure_log_message(char *msg, int id);

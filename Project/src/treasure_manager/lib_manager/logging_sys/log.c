@@ -93,12 +93,12 @@ void get_search_success_log_message(char *msg, int id) {
   snprintf(msg, LOG_MESSAGE_MAX, "SEARCH SUCCESS | ID: %d\n", id);
 }
 
-void get_list_failure_log_message(char *msg, char *path) {
+void get_list_failure_log_message(char *msg, const char *path) {
   snprintf(msg, LOG_MESSAGE_MAX, "LIST FAILURE | ITEM NOT FOUND | Path: %s\n",
            path);
 }
 
-void get_list_success_log_message(char *msg, char *path) {
+void get_list_success_log_message(char *msg, const char *path) {
   snprintf(msg, LOG_MESSAGE_MAX, "LIST SUCCESS | Path: %s\n", path);
 }
 
