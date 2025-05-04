@@ -40,5 +40,3 @@ clean:
 	rm -rf logs
 	mkdir treasure_hunts
 	mkdir logs
-
-.PHONY: all build clean init help add list remove_hunt remove_treasure
