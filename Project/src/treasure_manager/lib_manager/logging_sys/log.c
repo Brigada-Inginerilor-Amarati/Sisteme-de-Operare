@@ -33,7 +33,7 @@ int symlink_file(const char *dir_name) {
 //=============================================================================
 
 operation_error log_message(const char *path, const char *message) {
-  int fd = open(path, O_WRONLY | O_APPEND | O_CREAT, 0644);
+  int fd = open(path, O_WRONLY | O_APPEND | O_CREAT, PERMISSIONS);
   if (fd == -1) {
     perror("LOG OPEN FAILED");
     perror(path);
@@ -63,54 +63,47 @@ operation_error log_message(const char *path, const char *message) {
 //=============================================================================
 
 void get_add_failure_log_message(char *msg, treasure *t) {
-  snprintf(msg, LOG_MESSAGE_MAX,
-           "ADD FAILURE | INVALID INPUT | ID: %d | User: %s\n", t->id,
-           t->user_name);
+  sprintf(msg, "ADD FAILURE | INVALID INPUT | ID: %d | User: %s\n", t->id,
+          t->user_name);
 }
 
 void get_add_killed_log_message(char *msg, treasure *t) {
-  snprintf(msg, LOG_MESSAGE_MAX,
-           "ADD FAILURE | FILE ERROR | ID: %d | User: %s\n", t->id,
-           t->user_name);
+  sprintf(msg, "ADD FAILURE | FILE ERROR | ID: %d | User: %s\n", t->id,
+          t->user_name);
 }
 
 void get_add_success_log_message(char *msg, treasure *t) {
-  snprintf(msg, LOG_MESSAGE_MAX, "ADD SUCCESS | ID: %d | User: %s\n", t->id,
-           t->user_name);
+  sprintf(msg, "ADD SUCCESS | ID: %d | User: %s\n", t->id, t->user_name);
 }
 
 void get_search_killed_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH FAILURE | FILE NOT FOUND | ID: %d\n",
-           id);
+  sprintf(msg, "SEARCH FAILURE | FILE NOT FOUND | ID: %d\n", id);
 }
 
 void get_search_failure_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH FAILURE | ITEM NOT FOUND | ID: %d\n",
-           id);
+  sprintf(msg, "SEARCH FAILURE | ITEM NOT FOUND | ID: %d\n", id);
 }
 
 void get_search_success_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "SEARCH SUCCESS | ID: %d\n", id);
+  sprintf(msg, "SEARCH SUCCESS | ID: %d\n", id);
 }
 
 void get_list_failure_log_message(char *msg, const char *path) {
-  snprintf(msg, LOG_MESSAGE_MAX, "LIST FAILURE | ITEM NOT FOUND | Path: %s\n",
-           path);
+  sprintf(msg, "LIST FAILURE | ITEM NOT FOUND | Path: %s\n", path);
 }
 
 void get_list_success_log_message(char *msg, const char *path) {
-  snprintf(msg, LOG_MESSAGE_MAX, "LIST SUCCESS | Path: %s\n", path);
+  sprintf(msg, "LIST SUCCESS | Path: %s\n", path);
 }
 
 void get_remove_killed_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "REMOVE FAILURE | FILE ERROR | ID: %d\n", id);
+  sprintf(msg, "REMOVE FAILURE | FILE ERROR | ID: %d\n", id);
 }
 
 void get_remove_failure_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "REMOVE FAILURE | ITEM NOT FOUND | ID: %d\n",
-           id);
+  sprintf(msg, "REMOVE FAILURE | ITEM NOT FOUND | ID: %d\n", id);
 }
 
 void get_remove_success_log_message(char *msg, int id) {
-  snprintf(msg, LOG_MESSAGE_MAX, "REMOVE SUCCESS | ID: %d\n", id);
+  sprintf(msg, "REMOVE SUCCESS | ID: %d\n", id);
 }

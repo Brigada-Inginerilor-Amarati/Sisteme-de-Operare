@@ -3,16 +3,45 @@
 #include "../../manager_utils/manager_utils.h"
 #include "../../treasure_operations/treasure_operations.h"
 
-operation_error list_hunt(const char *path) {
+operation_error list_hunts() {
 
-  // prepare the path variables
-  char log_msg[LOG_MESSAGE_MAX];
-  char dir_path[PATH_MAX];
+  // open the treasure_hunts directory and list all the directories inside
+  DIR *dir;
+  struct dirent *entry;
+
+  // check if the treasure_hunts directory exists
+  dir = opendir(TREASURE_DIRECTORY);
+  if (dir == NULL) {
+    perror("LIST ERROR, DIRECTORY NOT FOUND");
+    return DIRECTORY_NOT_FOUND;
+  }
+
+  char msg[BUFSIZ];
   char treasure_file_path[PATH_MAX];
-  char log_file_path[PATH_MAX];
-  snprintf(dir_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
-  snprintf(log_file_path, PATH_MAX, "%s/%s", dir_path, LOG_FILE_NAME);
+
+  // parse the directory entries
+  while ((entry = readdir(dir)) != NULL) {
+    if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 &&
+        strcmp(entry->d_name, "..") != 0) {
+
+      // assemble the treasure file path
+      get_treasure_file_path(treasure_file_path, entry->d_name);
+
+      // print the hunt name and treasure count from each entry
+      snprintf(msg, BUFSIZ, "Hunt %s: \nTreasure count: %d\n\n", entry->d_name,
+               get_treasure_count(treasure_file_path));
+      write(STDOUT_FILENO, msg, strlen(msg));
+    }
+  }
+
+  // end the hunt listing
+  closedir(dir);
+  return NO_ERROR;
+}
+
+operation_error list_hunt(const char *hunt_dir) {
+
+  prepare_paths(hunt_dir);
 
   // check if the directory exists
   if (open(dir_path, O_DIRECTORY) == -1) {
@@ -24,14 +53,14 @@ operation_error list_hunt(const char *path) {
   int fd = open(treasure_file_path, O_RDONLY);
   if (fd == -1) {
     perror("LIST ERROR, FILE NOT FOUND");
-    get_list_failure_log_message(log_msg, path);
+    get_list_failure_log_message(log_msg, hunt_dir);
     log_message(log_file_path, log_msg);
     return DIRECTORY_NOT_FOUND;
   }
 
   // print the hunt name
   write(STDOUT_FILENO, "Hunt: ", strlen("Hunt: "));
-  write(STDOUT_FILENO, path, strlen(path));
+  write(STDOUT_FILENO, hunt_dir, strlen(hunt_dir));
   write(STDOUT_FILENO, "\n", strlen("\n"));
 
   // print the total size of the directory
@@ -68,25 +97,19 @@ operation_error list_hunt(const char *path) {
 
   // end the list operation
   close(fd);
-  get_list_success_log_message(log_msg, path);
+  get_list_success_log_message(log_msg, hunt_dir);
   log_message(log_file_path, log_msg);
 
   return NO_ERROR;
 }
 
-operation_error list_treasure(const char *path, int id) {
+operation_error list_treasure(const char *hunt_dir, int id) {
 
-  // prepare the path variables
-  char log_msg[LOG_MESSAGE_MAX];
-  char dir_path[PATH_MAX];
-  char treasure_file_path[PATH_MAX];
-  char log_file_path[PATH_MAX];
-  snprintf(dir_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
-  snprintf(log_file_path, PATH_MAX, "%s/%s", dir_path, LOG_FILE_NAME);
+  prepare_paths(hunt_dir);
 
   // check if the directory exists
-  if (open(dir_path, O_DIRECTORY) == -1) {
+  if (directory_exists(hunt_dir) != NO_ERROR) {
+    perror(dir_path);
     perror("LIST ERROR, DIRECTORY NOT FOUND");
     return DIRECTORY_NOT_FOUND;
   }
@@ -123,36 +146,4 @@ operation_error list_treasure(const char *path, int id) {
   get_search_failure_log_message(log_msg, id);
   log_message(log_file_path, log_msg);
   return TREASURE_NOT_FOUND;
-}
-
-operation_error list_hunts() {
-
-  // open the treasure_hunts directory and list all the directories inside
-  DIR *dir;
-  struct dirent *entry;
-
-  // check if the treasure_hunts directory exists
-  dir = opendir(TREASURE_DIRECTORY);
-  if (dir == NULL) {
-    perror("LIST ERROR, DIRECTORY NOT FOUND");
-    return DIRECTORY_NOT_FOUND;
-  }
-
-  char msg[BUFSIZ];
-
-  // parse the directory entries
-  while ((entry = readdir(dir)) != NULL) {
-    if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 &&
-        strcmp(entry->d_name, "..") != 0) {
-
-      // print the hunt name and treasure count from each entry
-      snprintf(msg, BUFSIZ, "Hunt %s: \nTreasure count: %d\n", entry->d_name,
-               get_treasure_count(entry->d_name));
-      write(STDOUT_FILENO, msg, strlen(msg));
-    }
-  }
-
-  // end the hunt listing
-  closedir(dir);
-  return NO_ERROR;
 }

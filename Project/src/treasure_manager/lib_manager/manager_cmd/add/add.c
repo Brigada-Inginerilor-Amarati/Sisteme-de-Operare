@@ -10,14 +10,9 @@ Task: Add a new treasure to the specified hunt in the treasures.csv file.
 Exception: Creates a new hunt directory if it does not exist.
 */
 
-operation_error add_treasure(char *path, int fd) {
+operation_error add_treasure(char *hunt_dir, int fd) {
 
-  char dir_path[PATH_MAX] = "";
-  char treasure_file_path[PATH_MAX] = "";
-  char log_file_path[PATH_MAX] = "";
-  snprintf(dir_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
-  snprintf(log_file_path, PATH_MAX, "%s/%s", dir_path, LOG_FILE_NAME);
+  prepare_paths(hunt_dir);
 
   if (!directory_exists(dir_path) && add_directory(dir_path) != NO_ERROR)
     return DIRECTORY_ERROR;
@@ -26,11 +21,11 @@ operation_error add_treasure(char *path, int fd) {
       add_file(log_file_path) != NO_ERROR)
     return FILE_ERROR;
 
-  if (symlink_file(path) != NO_ERROR)
+  if (symlink_file(hunt_dir) != NO_ERROR)
     return SYMLINK_ERROR;
 
   treasure t;
-  char log_msg[LOG_MESSAGE_MAX] = "";
+  char log_msg[BUFSIZ];
   operation_error err = create_treasure(&t, fd);
 
   if (err != NO_ERROR) {

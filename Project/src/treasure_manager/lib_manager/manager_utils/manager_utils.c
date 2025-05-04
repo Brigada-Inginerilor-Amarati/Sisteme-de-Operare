@@ -1,15 +1,52 @@
 #include "manager_utils.h"
 
 //=============================================================================
+// Path Creation
+//=============================================================================
+
+char dir_path[PATH_MAX];
+char treasure_file_path[PATH_MAX];
+char log_file_path[PATH_MAX];
+char log_msg[BUFSIZ];
+
+void prepare_paths(const char *hunt_dir) {
+  get_hunt_directory_path(dir_path, hunt_dir);
+  get_treasure_file_path(treasure_file_path, hunt_dir);
+  get_log_file_path(log_file_path, hunt_dir);
+}
+
+void get_root_hunt_directory_path(char *path) { path = TREASURE_DIRECTORY; }
+
+void get_hunt_directory_path(char *path, const char *hunt_name) {
+  snprintf(path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, hunt_name);
+}
+
+void get_treasure_file_path(char *path, const char *hunt_name) {
+  snprintf(path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, hunt_name,
+           TREASURE_FILE_NAME);
+}
+
+void get_log_file_path(char *path, const char *hunt_name) {
+  snprintf(path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, hunt_name,
+           LOG_FILE_NAME);
+}
+
+void get_symlink_directory_path(char *path) { path = LOG_DIRECTORY; }
+
+void get_symlink_path(char *path, const char *hunt_name) {
+  snprintf(path, PATH_MAX, "%s/%s.%s", LOG_DIRECTORY, hunt_name, LOG_FILE_NAME);
+}
+
+//=============================================================================
 // File / Directory Management
 //=============================================================================
 
 operation_error add_file(const char *path) {
   // check if the file exists
   if (open(path, F_OK) == -1) {
-    perror("File does not exist");
+    perror(path);
     // create the file
-    int fd = open(path, O_CREAT | O_WRONLY, PERMISSIONS);
+    int fd = open(path, CREATE_FILE, PERMISSIONS);
     if (fd == -1) {
       perror("File creation failed");
       return FILE_ERROR;
@@ -63,8 +100,8 @@ time_t get_treasure_file_last_modified(const char *path) {
   return st.st_mtime;
 }
 
-operation_error id_exists(const char *file_path, int id) {
-  int fd = open(file_path, O_RDONLY);
+operation_error id_exists(const char *path, int id) {
+  int fd = open(path, O_RDONLY);
   if (fd == -1)
     return FILE_ERROR;
 
@@ -81,11 +118,7 @@ operation_error id_exists(const char *file_path, int id) {
 }
 
 int get_treasure_count(const char *path) {
-  char treasure_file_path[PATH_MAX];
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s/%s", TREASURE_DIRECTORY, path,
-           TREASURE_FILE_NAME);
-
-  int fd = open(treasure_file_path, O_RDONLY);
+  int fd = open(path, O_RDONLY);
   if (fd == -1) {
     perror("LIST ERROR, FILE NOT FOUND");
     return FILE_NOT_FOUND;

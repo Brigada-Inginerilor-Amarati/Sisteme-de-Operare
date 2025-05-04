@@ -1,9 +1,10 @@
 #include "remove.h"
 #include "../../logging_sys/log.h"
+#include "../../manager_utils/manager_utils.h"
 
-operation_error remove_hunt(char *dir_name) {
+operation_error remove_hunt(char *hunt_name) {
   char path[PATH_MAX];
-  snprintf(path, sizeof(path), "%s/%s", TREASURE_DIRECTORY, dir_name);
+  get_hunt_directory_path(path, hunt_name);
 
   DIR *dir = opendir(path);
   if (!dir) {
@@ -15,6 +16,7 @@ operation_error remove_hunt(char *dir_name) {
   char file_path[PATH_MAX];
 
   while ((entry = readdir(dir)) != NULL) {
+
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
       continue;
 
@@ -35,26 +37,22 @@ operation_error remove_hunt(char *dir_name) {
     return DIRECTORY_ERROR;
   }
 
-  char log_msg[LOG_MESSAGE_MAX];
-  snprintf(log_msg, LOG_MESSAGE_MAX, "Hunt %s removed successfully\n",
-           dir_name);
+  char log_msg[BUFSIZ];
+  snprintf(log_msg, BUFSIZ, "Hunt %s removed successfully\n", hunt_name);
   write(STDOUT_FILENO, log_msg, strlen(log_msg));
 
   return NO_ERROR;
 }
 
-operation_error remove_treasure(char *path, int id) {
-  char dir_path[PATH_MAX];
-  char treasure_file_path[PATH_MAX];
-  char tmp_treasure_file_path[PATH_MAX];
-  char log_file_path[PATH_MAX];
-  char log_msg[LOG_MESSAGE_MAX];
+operation_error remove_treasure(char *hunt_dir, int id) {
 
-  snprintf(dir_path, PATH_MAX, "%s/%s", TREASURE_DIRECTORY, path);
-  snprintf(treasure_file_path, PATH_MAX, "%s/%s", dir_path, TREASURE_FILE_NAME);
+  prepare_paths(hunt_dir);
+
+  char tmp_treasure_file_path[PATH_MAX];
+  char log_msg[BUFSIZ];
+
   snprintf(tmp_treasure_file_path, PATH_MAX, "%s/copy_%s", dir_path,
            TREASURE_FILE_NAME);
-  snprintf(log_file_path, PATH_MAX, "%s/%s", dir_path, LOG_FILE_NAME);
 
   int in_fd = open(treasure_file_path, O_RDONLY);
   if (in_fd == -1) {
@@ -64,7 +62,8 @@ operation_error remove_treasure(char *path, int id) {
     return FILE_NOT_FOUND;
   }
 
-  int out_fd = open(tmp_treasure_file_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  int out_fd =
+      open(tmp_treasure_file_path, O_WRONLY | O_CREAT | O_TRUNC, PERMISSIONS);
   if (out_fd == -1) {
     perror("Failed to open temp file");
     get_remove_killed_log_message(log_msg, id);

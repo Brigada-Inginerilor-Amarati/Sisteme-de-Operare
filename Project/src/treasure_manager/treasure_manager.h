@@ -24,11 +24,11 @@
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define LOG_DIRECTORY "logs"
 #define LOG_FILE_NAME "log"
-#define LOG_MESSAGE_MAX 256
 
 #define USER_NAME_MAX_LENGTH 24
 #define CLUE_TEXT_MAX_LENGTH 80
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
+#define CREATE_FILE (O_CREAT | O_WRONLY | O_TRUNC)
 
 //=============================================================================
 // Main data structure
