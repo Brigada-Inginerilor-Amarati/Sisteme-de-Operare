@@ -15,6 +15,15 @@ Project/
 ├── treasure_hunts/ # Stores all hunt directories and treasure data files
 └── makefile # Build and Run Tool
 
+## 📦 Dependencies
+
+This project is designed for Unix-like systems (Linux/macOS) and uses only standard system interfaces.
+
+### 🛠️ Requirements
+
+- **Clang** – C compiler
+- **Make** – Build tool for automating compilation (Makefile included)
+
 ## 📌 Phase 1 – File Management System
 
 ### 🧩 Goal
@@ -74,18 +83,18 @@ hub (shell)
       └─ forks treasure_manager with appropriate flags
 ```
 
-## 🚀 Build and Run
+🧪 Notes
+• Fixed-size records ensure predictable binary layout
+• Removing treasures implies rewriting the binary file
+• Shell disables commands if the monitor hasn’t stopped
+• Symlinks are created automatically per hunt in logs/
 
-🧱 Build
+⚠️ Binary Architecture Notice
 
-```bash
-make init
-make build
-```
+The included treasure_manager and treasure_hub binaries are precompiled for ARM64 (e.g., Apple Silicon or ARM-based Linux systems).
+If you’re on a different architecture (e.g., x86_64), you must recompile them using: `make build`
 
-▶️ Run
+👨‍💻 Author
 
-```bash
-bin/treasure_manager # File Manager
-bin/treasure_hub # Interactive Shell
-```
+Paul Hondola
+University-level Systems Programming Project
