@@ -12,7 +12,6 @@ void sig_refresh_handler(int sig) {
 
 void sigchld_handler(int sig) {
   char log_msg[BUFSIZ];
-  int saved_errno = errno;
   int status;
   pid_t pid;
 
@@ -33,8 +32,6 @@ void sigchld_handler(int sig) {
       refresh_prompt();
     }
   }
-
-  errno = saved_errno;
 }
 
 void setup_signal_handlers(void) {
