@@ -5,12 +5,15 @@
 // Dependencies
 //=============================================================================
 
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
@@ -33,6 +36,19 @@
 #define MONITOR_CMD_PATH "./bin/treasure_monitor"
 #define MONITOR_CMD_NAME "treasure_monitor"
 
+#define TREASURE_DIRECTORY "treasure_hunts"
+#define CALCULATOR_CMD_PATH "./bin/treasure_calculator"
+#define CALCULATOR_CMD_NAME "treasure_calculator"
+
+#define COMMAND_HELP "help"
+#define COMMAND_EXIT "exit"
+#define COMMAND_CLEAR "clear"
+#define COMMAND_START_MONITOR "start_monitor"
+#define COMMAND_STOP_MONITOR "stop_monitor"
+#define COMMAND_LIST_HUNTS "list_hunts"
+#define COMMAND_LIST_TREASURES "list_treasures"
+#define COMMAND_VIEW_TREASURE "view_treasure"
+#define COMMAND_CALCULATE_SCORES "cs"
 //=============================================================================
 // Structs
 //=============================================================================
@@ -46,7 +62,8 @@ typedef enum {
   CMD_STOP_MONITOR,
   CMD_LIST_HUNTS,
   CMD_LIST_TREASURES,
-  CMD_VIEW_TREASURE
+  CMD_VIEW_TREASURE,
+  CMD_CALCULATE_SCORES
 } shell_command;
 
 typedef enum { OPERATION_FAILED, OPERATION_SUCCESS } operation_error;

@@ -28,21 +28,23 @@ shell_command parse_shell_cmd(char *string, char args[MAX_ARGS][BUFSIZ],
   } while (*argc < MAX_ARGS && (tok = strtok(NULL, " \n")) != NULL);
 
   // Map args[0] to an enum
-  if (strcmp(args[0], "help") == 0)
+  if (strcmp(args[0], COMMAND_HELP) == 0)
     return CMD_HELP;
-  else if (strcmp(args[0], "clear") == 0)
+  else if (strcmp(args[0], COMMAND_CLEAR) == 0)
     return CMD_CLEAR;
-  else if (strcmp(args[0], "start_monitor") == 0)
+  else if (strcmp(args[0], COMMAND_START_MONITOR) == 0)
     return CMD_START_MONITOR;
-  else if (strcmp(args[0], "stop_monitor") == 0)
+  else if (strcmp(args[0], COMMAND_STOP_MONITOR) == 0)
     return CMD_STOP_MONITOR;
-  else if (strcmp(args[0], "list_hunts") == 0)
+  else if (strcmp(args[0], COMMAND_LIST_HUNTS) == 0)
     return CMD_LIST_HUNTS;
-  else if (strcmp(args[0], "list_treasures") == 0)
+  else if (strcmp(args[0], COMMAND_LIST_TREASURES) == 0)
     return CMD_LIST_TREASURES;
-  else if (strcmp(args[0], "view_treasure") == 0)
+  else if (strcmp(args[0], COMMAND_VIEW_TREASURE) == 0)
     return CMD_VIEW_TREASURE;
-  else if (strcmp(args[0], "exit") == 0)
+  else if (strcmp(args[0], COMMAND_CALCULATE_SCORES) == 0)
+    return CMD_CALCULATE_SCORES;
+  else if (strcmp(args[0], COMMAND_EXIT) == 0)
     return CMD_EXIT;
   else
     return CMD_INVALID;
