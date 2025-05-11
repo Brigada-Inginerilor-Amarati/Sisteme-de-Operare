@@ -40,6 +40,10 @@ build:
 	@echo "\nProject built successfully"
 	bin/treasure_hub
 
+add:
+	@echo "Adding new element to treasure hunt"
+	bin/treasure_manager --add hunt01
+
 clean:
 	@echo "Cleaning project"
 	rm -rf treasure_hunts

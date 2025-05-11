@@ -36,6 +36,7 @@
 #define MONITOR_CMD_PATH "./bin/treasure_monitor"
 #define MONITOR_CMD_NAME "treasure_monitor"
 
+#define TREASURE_FILE_NAME "treasures.bin"
 #define TREASURE_DIRECTORY "treasure_hunts"
 #define CALCULATOR_CMD_PATH "./bin/treasure_calculator"
 #define CALCULATOR_CMD_NAME "treasure_calculator"

@@ -89,12 +89,14 @@ void execute_calculator(const char *path) {
     // Parent
     close(pipefd[1]); // Close write end
 
+    // read the data from the calculator
     char buffer[BUFSIZ];
     ssize_t n;
     while ((n = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
       buffer[n] = '\0';
       write(STDOUT_FILENO, buffer, n); // Output to terminal
     }
+
     close(pipefd[0]);
     waitpid(pid, NULL, 0); // Wait for child to finish
   }
@@ -130,8 +132,8 @@ operation_error cmd_calculate_scores() {
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
       continue;
 
-    snprintf(file_path, sizeof(file_path), "%s/%s", TREASURE_DIRECTORY,
-             entry->d_name);
+    snprintf(file_path, sizeof(file_path), "%s/%s/%s", TREASURE_DIRECTORY,
+             entry->d_name, TREASURE_FILE_NAME);
 
     execute_calculator(file_path);
   }
