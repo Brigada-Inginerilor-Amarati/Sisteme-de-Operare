@@ -1,4 +1,5 @@
 #include "monitor_control.h"
+#include <unistd.h>
 
 char log_msg[BUFSIZ];
 
@@ -6,37 +7,52 @@ char log_msg[BUFSIZ];
 // Start Monitor + Init Pipes
 //=============================================================================
 
-operation_error cmd_start_monitor(void) {
+int cmd_start_monitor(void) {
   // if the monitor is already running, return
   if (is_monitor_alive()) {
     snprintf(log_msg, BUFSIZ, "[!] Monitor already running (PID: %d)\n",
-             shell.monitor_pid);
+             monitor.pid);
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    return OPERATION_FAILED;
+    return 0;
   }
 
   // main process    write >--pipe--> read    child process
 
   // init the pipes
-  int pipefd[2];
-  if (pipe(pipefd) < 0) {
+  int shell_to_monitor_pipefd[2];
+  if (pipe(shell_to_monitor_pipefd) < 0) {
     perror("pipe");
-    return OPERATION_FAILED;
+    return 0;
   }
 
-  shell.monitor_pid = fork();
-  if (shell.monitor_pid < 0) {
+  int monitor_to_shell_pipefd[2];
+  if (pipe(monitor_to_shell_pipefd) < 0) {
+    perror("pipe");
+    return 0;
+  }
+
+  monitor.pid = fork();
+  if (monitor.pid < 0) {
     perror("Failed to fork monitor");
-    close(pipefd[0]);
-    close(pipefd[1]);
+    close(shell_to_monitor_pipefd[0]);
+    close(shell_to_monitor_pipefd[1]);
+    close(monitor_to_shell_pipefd[0]);
+    close(monitor_to_shell_pipefd[1]);
     exit(EXIT_FAILURE);
   }
 
-  if (shell.monitor_pid == 0) {
-    // child: close the write‑end, dup read‑end onto STDIN, then exec
-    close(pipefd[1]);
-    dup2(pipefd[0], STDIN_FILENO);
-    close(pipefd[0]);
+  if (monitor.pid == 0) {
+    // child: close the write‑end, dup read‑end onto STDIN
+    // for shell -> monitor communication
+    close(shell_to_monitor_pipefd[1]);
+    dup2(shell_to_monitor_pipefd[0], STDIN_FILENO);
+    close(shell_to_monitor_pipefd[0]);
+
+    // child: close the read-end, dup the write-end onto STDOUT
+    // for monitor -> shell communication
+    close(monitor_to_shell_pipefd[0]);
+    dup2(monitor_to_shell_pipefd[1], STDOUT_FILENO);
+    close(monitor_to_shell_pipefd[1]);
 
     execl(MONITOR_CMD_PATH, MONITOR_CMD_NAME, NULL);
     perror("execl");
@@ -44,35 +60,40 @@ operation_error cmd_start_monitor(void) {
   }
 
   // parent: close the read‑end, keep the write‑end for later
-  close(pipefd[0]);
-  shell.monitor_pipe_fd = pipefd[1];
-  shell.state = MON_ONLINE;
+  close(shell_to_monitor_pipefd[0]);
+  monitor.write_pipe_fd = shell_to_monitor_pipefd[1];
 
-  return OPERATION_SUCCESS;
+  // parent: close the write-end, keep the read-end for later
+  close(monitor_to_shell_pipefd[1]);
+  monitor.read_pipe_fd = monitor_to_shell_pipefd[0];
+
+  monitor.state = MONITOR_ONLINE;
+
+  return 1;
 }
 
 //=============================================================================
 // Stop Monitor and Cleanup
 //=============================================================================
 
-operation_error cmd_stop_monitor(void) {
+int cmd_stop_monitor(void) {
   if (!is_monitor_alive()) {
     snprintf(log_msg, BUFSIZ, "[!] No monitor process is currently running.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    return OPERATION_FAILED;
+    return 0;
   }
 
-  shell.state = MON_SHUTTING_DOWN;
-  kill(shell.monitor_pid, SIGTERM);
+  monitor.state = MONITOR_SHUTTING_DOWN;
+  kill(monitor.pid, SIGTERM);
 
   // close the pipes
-  close(shell.monitor_pipe_fd);
+  close(monitor.read_pipe_fd);
 
   // Inform the user we’ve sent SIGTERM; actual exit message
   // comes asynchronously in handle_sigchld().
   snprintf(log_msg, BUFSIZ, "[✓] Shutdown signal sent.\n");
   write(STDOUT_FILENO, log_msg, strlen(log_msg));
-  return OPERATION_SUCCESS;
+  return 1;
 }
 
 //=============================================================================
@@ -80,12 +101,12 @@ operation_error cmd_stop_monitor(void) {
 //=============================================================================
 
 int is_monitor_alive(void) {
-  return (shell.monitor_pid > 0) && (kill(shell.monitor_pid, 0) == 0);
+  return (monitor.pid > 0) && (kill(monitor.pid, 0) == 0);
 }
 
 // While monitor is shutting down, intercept commands and report status
 int check_monitor_stopping(void) {
-  if (shell.state != MON_SHUTTING_DOWN)
+  if (monitor.state != MONITOR_SHUTTING_DOWN)
     return 0;
 
   snprintf(log_msg, BUFSIZ, "[!] Monitor is shutting down, please wait.\n");

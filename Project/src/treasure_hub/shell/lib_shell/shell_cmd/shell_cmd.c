@@ -8,23 +8,23 @@ char log_msg[BUFSIZ];
 // List Commands + Monitor Pipe Management
 //=============================================================================
 
-operation_error send_to_monitor(const char *cmd_line) {
+int send_to_monitor(const char *cmd_line) {
 
   // error message if monitor is not running
   if (!is_monitor_alive()) {
     snprintf(log_msg, BUFSIZ,
              "[!] Monitor is not running. Use 'start_monitor' first.\n");
     write(STDOUT_FILENO, log_msg, strlen(log_msg));
-    return OPERATION_FAILED;
+    return 0;
   }
 
   // append newline so read_line in monitor sees an end‑of‑line
   snprintf(log_msg, BUFSIZ, "%s\n", cmd_line);
 
   // send data to monitor via pipe
-  write(shell.monitor_pipe_fd, log_msg, strlen(log_msg));
+  write(monitor.write_pipe_fd, log_msg, strlen(log_msg));
 
-  return OPERATION_SUCCESS;
+  return 1;
 }
 
 int check_argc_valid(shell_command cmd, int argc) {
@@ -41,9 +41,9 @@ int check_argc_valid(shell_command cmd, int argc) {
   }
 }
 
-operation_error cmd_list(shell_command cmd, char argv[][BUFSIZ], int argc) {
+int cmd_list(shell_command cmd, char argv[][BUFSIZ], int argc) {
   if (!check_argc_valid(cmd, argc))
-    return OPERATION_FAILED;
+    return 0;
 
   char buf[BUFSIZ];
   strcpy(argv[0], LIST_CMD);
@@ -111,28 +111,18 @@ void execute_calculator(const char *path) {
   }
 }
 
-operation_error cmd_calculate_scores() {
+int cmd_calculate_scores() {
 
   DIR *dir = opendir(TREASURE_DIRECTORY);
 
   if (!dir) {
     perror("CALCULATE_SCORES");
-    return OPERATION_FAILED;
+    return 0;
   }
-
-  // init the pipes
-  /*
-  int pipefd[2];
-  if (pipe(pipefd) < 0) {
-    perror("pipe");
-    return OPERATION_FAILED;
-  }
-  */
 
   // go through every directory entry and create a fork
   // execute inside every fork the calculate_scores, using the path for each
   // entry as an argument
-
   struct dirent *entry;
   char file_path[PATH_MAX];
 
@@ -147,24 +137,20 @@ operation_error cmd_calculate_scores() {
     execute_calculator(file_path);
   }
 
-  return OPERATION_SUCCESS;
+  return 1;
 }
 
 //=============================================================================
 // Command Dispatch
 //=============================================================================
 
-operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
-                                 int argc) {
+int dispatch_command(shell_command cmd, char argv[][BUFSIZ], int argc) {
   // Intercept during shutdown
   if (check_monitor_stopping())
-    return OPERATION_SUCCESS;
+    return 1;
 
   // Go through command cases
   switch (cmd) {
-  case CMD_HELP:
-    cmd_print_help();
-    break;
   case CMD_CLEAR:
     cmd_clear_screen();
     break;
@@ -185,7 +171,7 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
     return cmd_calculate_scores();
   default:
     cmd_print_help();
-    return OPERATION_FAILED;
+    return 0;
   }
-  return OPERATION_SUCCESS;
+  return 1;
 }

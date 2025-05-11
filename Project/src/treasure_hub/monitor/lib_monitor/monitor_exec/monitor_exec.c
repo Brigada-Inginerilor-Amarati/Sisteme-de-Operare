@@ -4,6 +4,15 @@
 // Execute the manager binary with the given command string
 //=============================================================================
 
+void read_data_from_treasure_manager(int fd) {
+  char buffer[BUFSIZ];
+  ssize_t n;
+  while ((n = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
+    buffer[n] = '\0';
+    write(STDOUT_FILENO, buffer, n);
+  }
+}
+
 void execute_manager(const char *cmd) {
 
   char msg[BUFSIZ];
@@ -41,7 +50,7 @@ void execute_manager(const char *cmd) {
     execlp("sh", "sh", "-c", cmd, (char *)NULL);
 
     // Refresh the screen and print error message
-    write(STDOUT_FILENO, "\r\033[K", 4);
+    write(STDERR_FILENO, "\r\033[K", 4);
     sprintf(msg, "[MONITOR] exec failed: %s\n", strerror(errno));
     write(STDERR_FILENO, msg, strlen(msg));
 
@@ -52,12 +61,7 @@ void execute_manager(const char *cmd) {
   close(pipefd[1]); // Close write end
 
   // read the data from the calculator
-  char buffer[BUFSIZ];
-  ssize_t n;
-  while ((n = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-    buffer[n] = '\0';
-    write(STDOUT_FILENO, buffer, n);
-  }
+  read_data_from_treasure_manager(pipefd[0]);
 
   // Parent waits for the child
   waitpid(pid, NULL, 0);

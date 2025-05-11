@@ -49,7 +49,8 @@
 #define COMMAND_LIST_HUNTS "list_hunts"
 #define COMMAND_LIST_TREASURES "list_treasures"
 #define COMMAND_VIEW_TREASURE "view_treasure"
-#define COMMAND_CALCULATE_SCORES "cs"
+#define COMMAND_CALCULATE_SCORES "calculate_scores"
+
 //=============================================================================
 // Structs
 //=============================================================================
@@ -67,18 +68,16 @@ typedef enum {
   CMD_CALCULATE_SCORES
 } shell_command;
 
-typedef enum { OPERATION_FAILED, OPERATION_SUCCESS } operation_error;
-
 typedef struct {
-  pid_t monitor_pid;
-  enum { MON_OFFLINE, MON_ONLINE, MON_SHUTTING_DOWN } state;
-  int monitor_pipe_fd;
-} shell_t;
+  pid_t pid;
+  enum { MONITOR_OFFLINE, MONITOR_ONLINE, MONITOR_SHUTTING_DOWN } state;
+  int read_pipe_fd, write_pipe_fd;
+} monitor_t;
 
 //=============================================================================
 // External Variables
 //=============================================================================
 
-extern shell_t shell;
+extern monitor_t monitor;
 
 #endif

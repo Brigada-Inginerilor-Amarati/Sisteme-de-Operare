@@ -23,8 +23,7 @@ void monitor_loop(void) {
     if (n <= 0)
       break;
 
-    // Reset the prompt
-    write(STDOUT_FILENO, "\r\033[K", 4);
+    write(STDERR_FILENO, "\r\033[K", 4);
 
     // Execute via the manager
     execute_manager(buf);
@@ -44,7 +43,7 @@ int main(void) {
 
   // Announce startup
   snprintf(msg, BUFSIZ, "[MONITOR] Monitor started (PID: %d)\n", getpid());
-  write(STDOUT_FILENO, msg, strlen(msg));
+  write(STDERR_FILENO, msg, strlen(msg));
 
   // Enter main loop
   monitor_loop();
@@ -54,6 +53,6 @@ int main(void) {
 
   // Announce shutdown
   snprintf(msg, BUFSIZ, "[MONITOR] Shutting down.\n");
-  write(STDOUT_FILENO, msg, strlen(msg));
+  write(STDERR_FILENO, msg, strlen(msg));
   return EXIT_SUCCESS;
 }

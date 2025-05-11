@@ -14,14 +14,14 @@ void refresh_prompt(void) {
   strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", tm_info);
   const char *status = NULL;
 
-  switch (shell.state) {
-  case MON_ONLINE:
+  switch (monitor.state) {
+  case MONITOR_ONLINE:
     status = "online";
     break;
-  case MON_OFFLINE:
+  case MONITOR_OFFLINE:
     status = "offline";
     break;
-  case MON_SHUTTING_DOWN:
+  case MONITOR_SHUTTING_DOWN:
     status = "shutting down";
     break;
   }
@@ -62,12 +62,10 @@ void cmd_print_help() {
       "exit -> if the monitor still runs, prints an error message, "
       "otherwise ends the program\n";
 
-  char help_msg[BUFSIZ];
-
-  snprintf(help_msg, BUFSIZ, "%s%s%s%s%s%s%s%s", usage_msg, start_msg, stop_msg,
+  snprintf(log_msg, BUFSIZ, "%s%s%s%s%s%s%s%s", usage_msg, start_msg, stop_msg,
            list_msg1, list_msg2, view_msg, compute, exit_msg);
 
-  write(STDOUT_FILENO, help_msg, strlen(help_msg));
+  write(STDOUT_FILENO, log_msg, strlen(log_msg));
 }
 
 //=============================================================================
@@ -86,5 +84,5 @@ void cmd_exit_shell() {
   snprintf(log_msg, BUFSIZ, "Exiting treasure_hub shell\n");
   write(STDOUT_FILENO, log_msg, strlen(log_msg));
 
-  exit(0);
+  exit(EXIT_SUCCESS);
 }

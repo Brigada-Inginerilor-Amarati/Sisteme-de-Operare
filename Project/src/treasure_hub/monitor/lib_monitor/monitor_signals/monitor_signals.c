@@ -1,18 +1,16 @@
 #include "monitor_signals.h"
+#include <unistd.h>
 
 //=============================================================================
 // Signal Handling -> Monitor Shutdown and Zombie Prevention
 //=============================================================================
 
 void handle_sigterm(int signum) {
-  // Shutdown signal received
-
-  // go to the previous line
-  write(STDOUT_FILENO, "\r\033[K", 4);
-
-  char msg[] = "[MONITOR] Received shutdown signal (%d)\n";
-  snprintf(msg, sizeof(msg), msg, signum);
-  write(STDOUT_FILENO, msg, strlen(msg));
+  char msg[BUFSIZ];
+  write(STDERR_FILENO, "\r\033[K", 4);
+  snprintf(msg, sizeof(msg), "[MONITOR] Received shutdown signal (%d)\n",
+           signum);
+  write(STDERR_FILENO, msg, strlen(msg));
 
   running = 0;
 }
