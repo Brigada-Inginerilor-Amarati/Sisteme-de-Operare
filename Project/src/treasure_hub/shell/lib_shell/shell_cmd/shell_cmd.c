@@ -76,6 +76,15 @@ void execute_calculator(const char *path) {
     return;
   }
 
+  if (pid < 0) {
+    write(STDOUT_FILENO, "\r\033[K", 4);
+
+    sprintf(log_msg, "[CALCULATOR] fork failed: %s\n", strerror(errno));
+    write(STDERR_FILENO, log_msg, strlen(log_msg));
+
+    return;
+  }
+
   if (pid == 0) {
     // Child
     close(pipefd[0]);               // Close read end
