@@ -54,13 +54,18 @@ void cmd_print_help() {
                    "to show the information "
                    "about a treasure in hunt\n\n";
 
-  char *exit_msg = "exit: if the monitor still runs, prints an error message, "
-                   "otherwise ends the program\n";
+  char *compute =
+      "calculate_scores -> starts a process for every hunt "
+      "directory and prints out the scores of users for each hunt\n\n";
+
+  char *exit_msg =
+      "exit -> if the monitor still runs, prints an error message, "
+      "otherwise ends the program\n";
 
   char help_msg[BUFSIZ];
 
-  snprintf(help_msg, BUFSIZ, "%s%s%s%s%s%s%s", usage_msg, start_msg, stop_msg,
-           list_msg1, list_msg2, view_msg, exit_msg);
+  snprintf(help_msg, BUFSIZ, "%s%s%s%s%s%s%s%s", usage_msg, start_msg, stop_msg,
+           list_msg1, list_msg2, view_msg, compute, exit_msg);
 
   write(STDOUT_FILENO, help_msg, strlen(help_msg));
 }

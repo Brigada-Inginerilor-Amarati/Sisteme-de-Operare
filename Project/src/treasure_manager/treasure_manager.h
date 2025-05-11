@@ -30,6 +30,7 @@
 #define PERMISSIONS (S_IRWXU | S_IRWXG | S_IRWXO)
 #define CREATE_FILE (O_CREAT | O_WRONLY | O_TRUNC)
 
+#define MAX_USERS_PER_HUNT 4096
 //=============================================================================
 // Main data structure
 //=============================================================================

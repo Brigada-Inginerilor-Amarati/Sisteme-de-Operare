@@ -1,6 +1,7 @@
 #include "shell_cmd.h"
 #include "../monitor_control/monitor_control.h"
 #include "../shell_utils/shell_utils.h"
+#include <sys/_types/_useconds_t.h>
 char log_msg[BUFSIZ];
 
 //=============================================================================
@@ -59,6 +60,88 @@ operation_error cmd_list(shell_command cmd, char argv[][BUFSIZ], int argc) {
 }
 
 //=============================================================================
+// Calculate Scores
+//=============================================================================
+
+void execute_calculator(const char *path) {
+  int pipefd[2];
+  if (pipe(pipefd) < 0) {
+    perror("pipe");
+    return;
+  }
+
+  pid_t pid = fork();
+  if (pid < 0) {
+    perror("fork");
+    return;
+  }
+
+  if (pid == 0) {
+    // Child
+    close(pipefd[0]);               // Close read end
+    dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to pipe
+    close(pipefd[1]);
+
+    execl(CALCULATOR_CMD_PATH, CALCULATOR_CMD_NAME, path, NULL);
+    perror("execl failed");
+    exit(EXIT_FAILURE);
+  } else {
+    // Parent
+    close(pipefd[1]); // Close write end
+
+    // read the data from the calculator
+    char buffer[BUFSIZ];
+    ssize_t n;
+    while ((n = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+      buffer[n] = '\0';
+      write(STDOUT_FILENO, buffer, n); // Output to terminal
+    }
+
+    close(pipefd[0]);
+    waitpid(pid, NULL, 0); // Wait for child to finish
+  }
+}
+
+operation_error cmd_calculate_scores() {
+
+  DIR *dir = opendir(TREASURE_DIRECTORY);
+
+  if (!dir) {
+    perror("CALCULATE_SCORES");
+    return OPERATION_FAILED;
+  }
+
+  // init the pipes
+  /*
+  int pipefd[2];
+  if (pipe(pipefd) < 0) {
+    perror("pipe");
+    return OPERATION_FAILED;
+  }
+  */
+
+  // go through every directory entry and create a fork
+  // execute inside every fork the calculate_scores, using the path for each
+  // entry as an argument
+
+  struct dirent *entry;
+  char file_path[PATH_MAX];
+
+  while ((entry = readdir(dir)) != NULL) {
+
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+
+    snprintf(file_path, sizeof(file_path), "%s/%s/%s", TREASURE_DIRECTORY,
+             entry->d_name, TREASURE_FILE_NAME);
+
+    execute_calculator(file_path);
+  }
+
+  return OPERATION_SUCCESS;
+}
+
+//=============================================================================
 // Command Dispatch
 //=============================================================================
 
@@ -89,6 +172,8 @@ operation_error dispatch_command(shell_command cmd, char argv[][BUFSIZ],
     return cmd_list(CMD_LIST_TREASURES, argv, argc);
   case CMD_VIEW_TREASURE:
     return cmd_list(CMD_VIEW_TREASURE, argv, argc);
+  case CMD_CALCULATE_SCORES:
+    return cmd_calculate_scores();
   default:
     cmd_print_help();
     return OPERATION_FAILED;

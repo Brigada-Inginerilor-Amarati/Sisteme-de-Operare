@@ -29,7 +29,7 @@ operation_error cmd_start_monitor(void) {
     perror("Failed to fork monitor");
     close(pipefd[0]);
     close(pipefd[1]);
-    return OPERATION_FAILED;
+    exit(EXIT_FAILURE);
   }
 
   if (shell.monitor_pid == 0) {
