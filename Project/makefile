@@ -40,7 +40,7 @@ build:
 	@echo "\nProject built successfully"
 	bin/treasure_hub
 
-add:
+manager:
 	@echo "Adding new element to treasure hunt"
 	bin/treasure_manager --add hunt01
 

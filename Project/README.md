@@ -65,8 +65,15 @@ Each hunt directory contains:
 
 Introduce `treasure_hub`, a shell that interacts with a background monitor process using UNIX signals and pipes. The monitor controls access to the `treasure_manager`.
 
+## 📌 Phase 2 – Processes and Signals
+
+### 🧩 Goal
+
+Introduce `treasure_calculator`, a shell addon that creates forks for every hunt in the main directory and calculates the user scores for each.
+
 ### 🛠️ Commands (Shell)
 
+- `calculate_scores` – Forks and launches the `treasure_calculator`
 - `start_monitor` – Forks and launches the `monitor`
 - `list_hunts` – Sends a signal to list available hunts via `treasure_manager`
 - `list_treasures <hunt_id>` – Lists all treasures from a specific hunt
